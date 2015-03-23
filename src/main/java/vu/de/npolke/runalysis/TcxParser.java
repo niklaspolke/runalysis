@@ -25,6 +25,8 @@ public class TcxParser {
 
 	public static final String USAGE = "usage: " + TcxParser.class.getSimpleName() + " <filename>";
 
+	private static final String ELEMENT_LAP = "Lap";
+	private static final String ELEMENT_TRACKPOINT = "Trackpoint";
 	private static final String ELEMENT_DISTANCE = "DistanceMeters";
 	private static final String ELEMENT_TIME = "TotalTimeSeconds";
 
@@ -34,10 +36,16 @@ public class TcxParser {
 
 	private double durationInSeconds;
 
+	private int amountOfLaps;
+
+	private int amountOfTrackpoints;
+
 	public TcxParser(final String filename) {
 		this.filename = filename;
 		distanceInMeters = 0.0;
 		durationInSeconds = 0.0;
+		amountOfLaps = 0;
+		amountOfTrackpoints = 0;
 	}
 
 	public String getFilename() {
@@ -50,6 +58,14 @@ public class TcxParser {
 
 	public double getDuration() {
 		return durationInSeconds;
+	}
+
+	public int getAmountOfLaps() {
+		return amountOfLaps;
+	}
+
+	public int getAmountOfTrackpoints() {
+		return amountOfTrackpoints;
 	}
 
 	public void readFile() {
@@ -74,6 +90,10 @@ public class TcxParser {
 						withinDistance = true;
 					} else if (ELEMENT_TIME.equalsIgnoreCase(localname)) {
 						withinTotalTimeSeconds = true;
+					} else if (ELEMENT_LAP.equalsIgnoreCase(localname)) {
+						amountOfLaps++;
+					} else if (ELEMENT_TRACKPOINT.equalsIgnoreCase(localname)) {
+						amountOfTrackpoints++;
 					}
 					break;
 
@@ -124,6 +144,8 @@ public class TcxParser {
 			System.out.println();
 			System.out.println("track duration: " + formatAsDuration(parser.getDuration()) + " h");
 			System.out.println("track distance: " + String.format("%7.0f", parser.getDistance()) + " m");
+			System.out.println("        # laps: " + String.format("%7d", parser.getAmountOfLaps()));
+			System.out.println(" # trackpoints: " + String.format("%7d", parser.getAmountOfTrackpoints()));
 		}
 	}
 }
