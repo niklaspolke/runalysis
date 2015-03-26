@@ -5,11 +5,14 @@ import static javax.xml.stream.XMLStreamConstants.*;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.zip.ZipInputStream;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -33,6 +36,8 @@ public class TcxParser {
 
 	public static final String USAGE = "usage: " + TcxParser.class.getSimpleName() + " <filename>";
 
+	public static final String FILE_ENDING_ZIP = ".ZIP";
+
 	public static final String ELEMENT_LAP = "Lap";
 	public static final String ELEMENT_LAP_PROPERTY_STARTTIME = "StartTime";
 	public static final String ELEMENT_LAP_DISTANCE = "DistanceMeters";
@@ -46,6 +51,7 @@ public class TcxParser {
 	private static final SimpleDateFormat TIMESTAMP_FORMATTER = new SimpleDateFormat(TIMESTAMP_FORMAT);
 
 	private final String filename;
+	private InputStream inputStream;
 
 	private ParserState state;
 
@@ -54,6 +60,11 @@ public class TcxParser {
 	public TcxParser(final String filename) {
 		this.filename = filename;
 		laps = new LinkedList<Lap>();
+	}
+
+	public TcxParser(final String filename, final InputStream inputStream) {
+		this(filename);
+		this.inputStream = inputStream;
 	}
 
 	public String getFilename() {
@@ -107,7 +118,23 @@ public class TcxParser {
 	public void readFile() {
 		try {
 			XMLInputFactory factory = XMLInputFactory.newInstance();
-			XMLStreamReader xmlReader = factory.createXMLStreamReader(new FileInputStream(filename));
+			XMLStreamReader xmlReader;
+			InputStream inputStream;
+
+			if (this.inputStream != null) {
+				inputStream = this.inputStream;
+			} else {
+				inputStream = new FileInputStream(filename);
+			}
+
+			if (filename.toUpperCase().endsWith(FILE_ENDING_ZIP)) {
+				ZipInputStream zipInputStream = new ZipInputStream(inputStream);
+				// read the first entry within the zip file
+				zipInputStream.getNextEntry();
+				xmlReader = factory.createXMLStreamReader(zipInputStream);
+			} else {
+				xmlReader = factory.createXMLStreamReader(inputStream);
+			}
 
 			state = new ParserStateDefault(this);
 
@@ -135,6 +162,8 @@ public class TcxParser {
 			System.out.println("FileNotFound: " + filename);
 			e.printStackTrace();
 		} catch (XMLStreamException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
