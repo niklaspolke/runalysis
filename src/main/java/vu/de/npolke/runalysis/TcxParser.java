@@ -5,10 +5,18 @@ import static javax.xml.stream.XMLStreamConstants.*;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+
+import vu.de.npolke.runalysis.states.ParserState;
+import vu.de.npolke.runalysis.states.ParserStateDefault;
 
 /**
  * Copyright (C) 2015 Niklas Polke<br/>
@@ -25,47 +33,75 @@ public class TcxParser {
 
 	public static final String USAGE = "usage: " + TcxParser.class.getSimpleName() + " <filename>";
 
-	private static final String ELEMENT_LAP = "Lap";
-	private static final String ELEMENT_TRACKPOINT = "Trackpoint";
-	private static final String ELEMENT_DISTANCE = "DistanceMeters";
-	private static final String ELEMENT_TIME = "TotalTimeSeconds";
+	public static final String ELEMENT_LAP = "Lap";
+	public static final String ELEMENT_LAP_PROPERTY_STARTTIME = "StartTime";
+	public static final String ELEMENT_LAP_DISTANCE = "DistanceMeters";
+	public static final String ELEMENT_LAP_DURATION = "TotalTimeSeconds";
+	public static final String ELEMENT_LAP_INTENSITY = "Intensity";
+	public static final String ELEMENT_POINT = "Trackpoint";
+	public static final String ELEMENT_POINT_DISTANCE = "DistanceMeters";
+	public static final String ELEMENT_POINT_TIME = "Time";
+
+	private static final String TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+	private static final SimpleDateFormat TIMESTAMP_FORMATTER = new SimpleDateFormat(TIMESTAMP_FORMAT);
 
 	private final String filename;
 
-	private double distanceInMeters;
+	private ParserState state;
 
-	private double durationInSeconds;
-
-	private int amountOfLaps;
-
-	private int amountOfTrackpoints;
+	private List<Lap> laps;
 
 	public TcxParser(final String filename) {
 		this.filename = filename;
-		distanceInMeters = 0.0;
-		durationInSeconds = 0.0;
-		amountOfLaps = 0;
-		amountOfTrackpoints = 0;
+		laps = new LinkedList<Lap>();
 	}
 
 	public String getFilename() {
 		return filename;
 	}
 
-	public double getDistance() {
+	public void changeState(final ParserState newState) {
+		state = newState;
+	}
+
+	public List<Lap> getLaps() {
+		return laps;
+	}
+
+	public void setLaps(final List<Lap> laps) {
+		this.laps = laps;
+	}
+
+	public void addLap(final Lap newLap) {
+		laps.add(newLap);
+	}
+
+	public double getDistanceInMeters() {
+		double distanceInMeters = 0;
+		for (Lap lap : laps) {
+			distanceInMeters += lap.getDistanceMeters();
+		}
 		return distanceInMeters;
 	}
 
-	public double getDuration() {
+	public double getDurationInSeconds() {
+		double durationInSeconds = 0;
+		for (Lap lap : laps) {
+			durationInSeconds += lap.getTotalTimeSeconds();
+		}
 		return durationInSeconds;
 	}
 
 	public int getAmountOfLaps() {
-		return amountOfLaps;
+		return laps.size();
 	}
 
-	public int getAmountOfTrackpoints() {
-		return amountOfTrackpoints;
+	public int getAmountOfPoints() {
+		int amountOfPoints = 0;
+		for (Lap lap : laps) {
+			amountOfPoints += lap.getPoints().size();
+		}
+		return amountOfPoints;
 	}
 
 	public void readFile() {
@@ -73,10 +109,7 @@ public class TcxParser {
 			XMLInputFactory factory = XMLInputFactory.newInstance();
 			XMLStreamReader xmlReader = factory.createXMLStreamReader(new FileInputStream(filename));
 
-			boolean withinDistance = false;
-			boolean withinTotalTimeSeconds = false;
-
-			String localname, text;
+			state = new ParserStateDefault(this);
 
 			while (xmlReader.hasNext()) {
 				switch (xmlReader.getEventType()) {
@@ -85,34 +118,15 @@ public class TcxParser {
 					break;
 
 				case START_ELEMENT:
-					localname = xmlReader.getLocalName();
-					if (ELEMENT_DISTANCE.equalsIgnoreCase(localname)) {
-						withinDistance = true;
-					} else if (ELEMENT_TIME.equalsIgnoreCase(localname)) {
-						withinTotalTimeSeconds = true;
-					} else if (ELEMENT_LAP.equalsIgnoreCase(localname)) {
-						amountOfLaps++;
-					} else if (ELEMENT_TRACKPOINT.equalsIgnoreCase(localname)) {
-						amountOfTrackpoints++;
-					}
+					state.handleStartElement(xmlReader);
 					break;
 
 				case CHARACTERS:
-					text = xmlReader.getText();
-					if (withinDistance) {
-						distanceInMeters = Double.parseDouble(text);
-					} else if (withinTotalTimeSeconds) {
-						durationInSeconds += Double.parseDouble(text);
-					}
+					state.handleCharacters(xmlReader);
 					break;
 
 				case END_ELEMENT:
-					localname = xmlReader.getLocalName();
-					if (ELEMENT_DISTANCE.equalsIgnoreCase(localname)) {
-						withinDistance = false;
-					} else if (ELEMENT_TIME.equalsIgnoreCase(localname)) {
-						withinTotalTimeSeconds = false;
-					}
+					state.handleEndElement(xmlReader);
 					break;
 				}
 				xmlReader.next();
@@ -123,6 +137,16 @@ public class TcxParser {
 		} catch (XMLStreamException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static Date extractTimestamp(final String timestampText) {
+		Date timestamp = null;
+		try {
+			timestamp = TIMESTAMP_FORMATTER.parse(timestampText);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return timestamp;
 	}
 
 	public static String formatAsDuration(final double secondsAsDouble) {
@@ -142,10 +166,19 @@ public class TcxParser {
 			parser.readFile();
 			System.out.println("Reading file \"" + args[0] + "\" ... done.");
 			System.out.println();
-			System.out.println("track duration: " + formatAsDuration(parser.getDuration()) + " h");
-			System.out.println("track distance: " + String.format("%7.0f", parser.getDistance()) + " m");
+			System.out.println("track duration: " + formatAsDuration(parser.getDurationInSeconds()) + " h");
+			System.out.println("track distance: " + String.format("%7.0f", parser.getDistanceInMeters()) + " m");
 			System.out.println("        # laps: " + String.format("%7d", parser.getAmountOfLaps()));
-			System.out.println(" # trackpoints: " + String.format("%7d", parser.getAmountOfTrackpoints()));
+			System.out.println(" # trackpoints: " + String.format("%7d", parser.getAmountOfPoints()));
+			System.out.println();
+			System.out.println("Correcting breaks...");
+			BreakCorrectionLogic.removeBreaksFromTrack(parser.getLaps());
+			System.out.println("Correcting breaks... done.");
+			System.out.println();
+			System.out.println("track duration: " + formatAsDuration(parser.getDurationInSeconds()) + " h");
+			System.out.println("track distance: " + String.format("%7.0f", parser.getDistanceInMeters()) + " m");
+			System.out.println("        # laps: " + String.format("%7d", parser.getAmountOfLaps()));
+			System.out.println(" # trackpoints: " + String.format("%7d", parser.getAmountOfPoints()));
 		}
 	}
 }
