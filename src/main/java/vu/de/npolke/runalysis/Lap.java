@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * Copyright (C) 2015 Niklas Polke<br/>
@@ -18,7 +19,12 @@ import java.util.List;
  */
 public class Lap {
 
-	private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
+	private static SimpleDateFormat TIME_FORMAT;
+
+	static {
+		TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
+		TIME_FORMAT.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
+	}
 
 	private Date startTime;
 

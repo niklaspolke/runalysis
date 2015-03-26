@@ -2,6 +2,7 @@ package vu.de.npolke.runalysis;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Copyright (C) 2015 Niklas Polke<br/>
@@ -16,7 +17,12 @@ import java.util.Date;
  */
 public class Trackpoint {
 
-	private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
+	private static SimpleDateFormat TIME_FORMAT;
+
+	static {
+		TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
+		TIME_FORMAT.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
+	}
 
 	private Date time;
 
@@ -43,7 +49,7 @@ public class Trackpoint {
 
 	@Override
 	public String toString() {
-		return Trackpoint.class.getSimpleName() + ": (" + TIME_FORMAT.format(time) + "): "
-				+ String.format("%5.0f", getDistanceMeters()) + " m";
+		return Trackpoint.class.getSimpleName() + ": (" + TIME_FORMAT.format(time) + "): " + String.format("%5.0f", getDistanceMeters())
+				+ " m";
 	}
 }
