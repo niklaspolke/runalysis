@@ -1,5 +1,7 @@
 package vu.de.npolke.runalysis.gui.cells;
 
+import java.util.Locale;
+
 /**
  * Copyright (C) 2015 Niklas Polke<br/>
  * <br/>
@@ -23,6 +25,6 @@ public class DistanceCell {
 
 	@Override
 	public String toString() {
-		return String.format(DISTANCE_FORMAT, distanceInKilometers);
+		return String.format(Locale.ENGLISH, DISTANCE_FORMAT, distanceInKilometers);
 	}
 }

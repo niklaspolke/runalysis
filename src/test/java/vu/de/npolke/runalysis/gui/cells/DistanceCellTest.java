@@ -26,16 +26,16 @@ public class DistanceCellTest {
 
 	@Test
 	public void testMeters() {
-		assertEquals("0,123 km", new DistanceCell(DISTANCE1_METERS).toString());
+		assertEquals("0.123 km", new DistanceCell(DISTANCE1_METERS).toString());
 	}
 
 	@Test
 	public void testShortKilometers() {
-		assertEquals("1,234 km", new DistanceCell(DISTANCE2_METERS).toString());
+		assertEquals("1.234 km", new DistanceCell(DISTANCE2_METERS).toString());
 	}
 
 	@Test
 	public void testLongKilometers() {
-		assertEquals("12,345 km", new DistanceCell(DISTANCE3_METERS).toString());
+		assertEquals("12.345 km", new DistanceCell(DISTANCE3_METERS).toString());
 	}
 }
