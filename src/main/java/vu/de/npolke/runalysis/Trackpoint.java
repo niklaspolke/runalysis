@@ -17,6 +17,7 @@ import java.util.TimeZone;
  */
 public class Trackpoint {
 
+	// NOT thread-safe
 	private static SimpleDateFormat TIME_FORMAT;
 
 	static {

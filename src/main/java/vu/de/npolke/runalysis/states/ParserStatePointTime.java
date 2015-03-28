@@ -48,6 +48,6 @@ public class ParserStatePointTime implements ParserState {
 	@Override
 	public void handleCharacters(final XMLStreamReader xmlReader) {
 		String text = xmlReader.getText();
-		point.setTime(TcxParser.extractTimestamp(text));
+		point.setTime(parser.extractTimestamp(text));
 	}
 }

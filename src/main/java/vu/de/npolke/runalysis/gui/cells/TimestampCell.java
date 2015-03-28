@@ -1,6 +1,8 @@
 package vu.de.npolke.runalysis.gui.cells;
 
-import javax.swing.table.DefaultTableCellRenderer;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Copyright (C) 2015 Niklas Polke<br/>
@@ -13,16 +15,20 @@ import javax.swing.table.DefaultTableCellRenderer;
  *
  * @author Niklas Polke
  */
-@SuppressWarnings("serial")
-public class TableCellRenderer extends DefaultTableCellRenderer {
+public class TimestampCell {
+
+	private final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+	private final Date timestamp;
+
+	public TimestampCell(final Date timestamp) {
+		this.timestamp = (Date) timestamp.clone();
+
+		TIMESTAMP_FORMAT.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
+	}
 
 	@Override
-	public void setValue(Object value) {
-		if (value instanceof DistanceCell || value instanceof DurationCell || value instanceof PaceCell || value instanceof TimestampCell) {
-			setHorizontalAlignment(RIGHT);
-		} else {
-			setHorizontalAlignment(CENTER);
-		}
-		setText(value.toString());
+	public String toString() {
+		return TIMESTAMP_FORMAT.format(timestamp);
 	}
 }

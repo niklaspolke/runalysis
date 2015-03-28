@@ -49,12 +49,12 @@ public class BreakCorrectionLogic {
 		lapToCorrect.setDistanceMeters(lapToCorrect.getDistanceMeters() - distanceDuringBreak);
 	}
 
-	public static void removeBreaksFromTrack(final List<Lap> laps) {
+	public static void removeBreaksFromTrack(final Track track) {
 		List<Lap> runningLaps = new ArrayList<Lap>();
 		List<Lap> breakLaps = new LinkedList<Lap>();
 
 		// divide laps into running and break laps
-		for (Lap lap : laps) {
+		for (Lap lap : track.getLaps()) {
 			if (LapIntensity.RESTING.equals(lap.getIntensity())) {
 				breakLaps.add(lap);
 			} else {
@@ -64,7 +64,7 @@ public class BreakCorrectionLogic {
 
 		// remove restingLaps
 		for (Lap breaklap : breakLaps) {
-			laps.remove(breaklap);
+			track.getLaps().remove(breaklap);
 		}
 
 		// correct time and distance in running laps with break(s)

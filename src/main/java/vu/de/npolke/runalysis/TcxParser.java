@@ -10,8 +10,6 @@ import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.zip.ZipInputStream;
 
 import javax.xml.stream.XMLInputFactory;
@@ -38,6 +36,7 @@ public class TcxParser {
 
 	public static final String FILE_ENDING_ZIP = ".ZIP";
 
+	public static final String ELEMENT_ID = "Id";
 	public static final String ELEMENT_LAP = "Lap";
 	public static final String ELEMENT_LAP_PROPERTY_STARTTIME = "StartTime";
 	public static final String ELEMENT_LAP_DISTANCE = "DistanceMeters";
@@ -55,11 +54,11 @@ public class TcxParser {
 
 	private ParserState state;
 
-	private List<Lap> laps;
+	private Track track;
 
 	public TcxParser(final String filename) {
 		this.filename = filename;
-		laps = new LinkedList<Lap>();
+		track = new Track();
 	}
 
 	public TcxParser(final String filename, final InputStream inputStream) {
@@ -75,41 +74,13 @@ public class TcxParser {
 		state = newState;
 	}
 
-	public List<Lap> getLaps() {
-		return laps;
-	}
-
-	public void setLaps(final List<Lap> laps) {
-		this.laps = laps;
-	}
-
-	public void addLap(final Lap newLap) {
-		laps.add(newLap);
-	}
-
-	public double getDistanceInMeters() {
-		double distanceInMeters = 0;
-		for (Lap lap : laps) {
-			distanceInMeters += lap.getDistanceMeters();
-		}
-		return distanceInMeters;
-	}
-
-	public double getDurationInSeconds() {
-		double durationInSeconds = 0;
-		for (Lap lap : laps) {
-			durationInSeconds += lap.getTotalTimeSeconds();
-		}
-		return durationInSeconds;
-	}
-
-	public int getAmountOfLaps() {
-		return laps.size();
+	public Track getTrack() {
+		return track;
 	}
 
 	public int getAmountOfPoints() {
 		int amountOfPoints = 0;
-		for (Lap lap : laps) {
+		for (Lap lap : track.getLaps()) {
 			amountOfPoints += lap.getPoints().size();
 		}
 		return amountOfPoints;
@@ -168,7 +139,7 @@ public class TcxParser {
 		}
 	}
 
-	public static Date extractTimestamp(final String timestampText) {
+	public Date extractTimestamp(final String timestampText) {
 		Date timestamp = null;
 		try {
 			timestamp = TIMESTAMP_FORMATTER.parse(timestampText);
@@ -195,18 +166,18 @@ public class TcxParser {
 			parser.readFile();
 			System.out.println("Reading file \"" + args[0] + "\" ... done.");
 			System.out.println();
-			System.out.println("track duration: " + formatAsDuration(parser.getDurationInSeconds()) + " h");
-			System.out.println("track distance: " + String.format("%7.0f", parser.getDistanceInMeters()) + " m");
-			System.out.println("        # laps: " + String.format("%7d", parser.getAmountOfLaps()));
+			System.out.println("track duration: " + formatAsDuration(parser.getTrack().getTotalTimeSeconds()) + " h");
+			System.out.println("track distance: " + String.format("%7.0f", parser.getTrack().getDistanceMeters()) + " m");
+			System.out.println("        # laps: " + String.format("%7d", parser.getTrack().getLaps().size()));
 			System.out.println(" # trackpoints: " + String.format("%7d", parser.getAmountOfPoints()));
 			System.out.println();
 			System.out.println("Correcting breaks...");
-			BreakCorrectionLogic.removeBreaksFromTrack(parser.getLaps());
+			BreakCorrectionLogic.removeBreaksFromTrack(parser.getTrack());
 			System.out.println("Correcting breaks... done.");
 			System.out.println();
-			System.out.println("track duration: " + formatAsDuration(parser.getDurationInSeconds()) + " h");
-			System.out.println("track distance: " + String.format("%7.0f", parser.getDistanceInMeters()) + " m");
-			System.out.println("        # laps: " + String.format("%7d", parser.getAmountOfLaps()));
+			System.out.println("track duration: " + formatAsDuration(parser.getTrack().getTotalTimeSeconds()) + " h");
+			System.out.println("track distance: " + String.format("%7.0f", parser.getTrack().getDistanceMeters()) + " m");
+			System.out.println("        # laps: " + String.format("%7d", parser.getTrack().getLaps().size()));
 			System.out.println(" # trackpoints: " + String.format("%7d", parser.getAmountOfPoints()));
 		}
 	}

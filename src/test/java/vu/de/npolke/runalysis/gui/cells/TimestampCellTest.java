@@ -1,6 +1,12 @@
 package vu.de.npolke.runalysis.gui.cells;
 
-import javax.swing.table.DefaultTableCellRenderer;
+import static org.junit.Assert.*;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import org.junit.Test;
 
 /**
  * Copyright (C) 2015 Niklas Polke<br/>
@@ -13,16 +19,14 @@ import javax.swing.table.DefaultTableCellRenderer;
  *
  * @author Niklas Polke
  */
-@SuppressWarnings("serial")
-public class TableCellRenderer extends DefaultTableCellRenderer {
+public class TimestampCellTest {
 
-	@Override
-	public void setValue(Object value) {
-		if (value instanceof DistanceCell || value instanceof DurationCell || value instanceof PaceCell || value instanceof TimestampCell) {
-			setHorizontalAlignment(RIGHT);
-		} else {
-			setHorizontalAlignment(CENTER);
-		}
-		setText(value.toString());
+	private static final String TIMESTAMP1 = "2015-03-24 15:15";
+
+	@Test
+	public void testTimestamp() throws ParseException {
+		SimpleDateFormat timestampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		Date timestamp = timestampFormat.parse(TIMESTAMP1);
+		assertEquals(TIMESTAMP1, new TimestampCell(timestamp).toString());
 	}
 }
