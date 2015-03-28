@@ -1,9 +1,10 @@
 package vu.de.npolke.runalysis;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 
 /**
@@ -17,28 +18,25 @@ import java.util.TimeZone;
  *
  * @author Niklas Polke
  */
-public class Lap {
+public class Track {
 
 	// NOT thread-safe
 	private static SimpleDateFormat TIME_FORMAT;
+	private static SimpleDateFormat DURATION_FORMAT;
 
 	static {
-		TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
+		TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		TIME_FORMAT.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
+		DURATION_FORMAT = new SimpleDateFormat("H:mm:ss");
+		DURATION_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
 	}
 
 	private Date startTime;
 
-	private double totalTimeSeconds;
+	private List<Lap> laps;
 
-	private double distanceMeters;
-
-	private LapIntensity intensity;
-
-	private List<Trackpoint> points;
-
-	public Lap() {
-		points = new LinkedList<Trackpoint>();
+	public Track() {
+		laps = new ArrayList<Lap>();
 	}
 
 	public Date getStartTime() {
@@ -50,40 +48,33 @@ public class Lap {
 	}
 
 	public double getTotalTimeSeconds() {
-		return totalTimeSeconds;
-	}
-
-	public void setTotalTimeSeconds(final double totalTimeSeconds) {
-		this.totalTimeSeconds = totalTimeSeconds;
+		double durationInSeconds = 0;
+		for (Lap lap : getLaps()) {
+			durationInSeconds += lap.getTotalTimeSeconds();
+		}
+		return durationInSeconds;
 	}
 
 	public double getDistanceMeters() {
-		return distanceMeters;
+		double distanceInMeters = 0;
+		for (Lap lap : getLaps()) {
+			distanceInMeters += lap.getDistanceMeters();
+		}
+		return distanceInMeters;
 	}
 
-	public void setDistanceMeters(final double distanceMeters) {
-		this.distanceMeters = distanceMeters;
+	public List<Lap> getLaps() {
+		return laps;
 	}
 
-	public LapIntensity getIntensity() {
-		return intensity;
-	}
-
-	public void setIntensity(final LapIntensity intensity) {
-		this.intensity = intensity;
-	}
-
-	public List<Trackpoint> getPoints() {
-		return points;
-	}
-
-	public void addPoint(final Trackpoint newPoint) {
-		points.add(newPoint);
+	public void addLap(final Lap lap) {
+		laps.add(lap);
 	}
 
 	@Override
 	public String toString() {
-		return Lap.class.getSimpleName() + " (" + TIME_FORMAT.format(getStartTime()) + ", " + getIntensity() + "): "
-				+ String.format("%5.0f", getTotalTimeSeconds()) + " secs " + String.format("%5.0f", getDistanceMeters()) + " m";
+		return Track.class.getSimpleName() + " (" + TIME_FORMAT.format(getStartTime()) + "): "
+				+ DURATION_FORMAT.format(new Date((long) (getTotalTimeSeconds() * 1000))) + " h - "
+				+ String.format(Locale.ENGLISH, "%5.3f", getDistanceMeters() / 1000) + " km - " + getLaps().size() + " lap(s)";
 	}
 }

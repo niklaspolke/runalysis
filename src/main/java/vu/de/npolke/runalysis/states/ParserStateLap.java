@@ -66,7 +66,7 @@ public class ParserStateLap implements ParserState {
 	public void handleEndElement(final XMLStreamReader xmlReader) {
 		String endElement = xmlReader.getLocalName();
 		if (TcxParser.ELEMENT_LAP.equalsIgnoreCase(endElement)) {
-			parser.addLap(lap);
+			parser.getTrack().addLap(lap);
 			parser.changeState(parent);
 		}
 	}

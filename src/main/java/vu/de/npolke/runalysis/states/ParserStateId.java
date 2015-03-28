@@ -2,7 +2,6 @@ package vu.de.npolke.runalysis.states;
 
 import javax.xml.stream.XMLStreamReader;
 
-import vu.de.npolke.runalysis.Lap;
 import vu.de.npolke.runalysis.TcxParser;
 
 /**
@@ -16,37 +15,32 @@ import vu.de.npolke.runalysis.TcxParser;
  *
  * @author Niklas Polke
  */
-public class ParserStateDefault implements ParserState {
+public class ParserStateId implements ParserState {
 
 	private final TcxParser parser;
 
-	private final ParserStateId stateId;
-	private final ParserStateLap stateLap;
+	private final ParserState parent;
 
-	public ParserStateDefault(final TcxParser parser) {
+	public ParserStateId(final TcxParser parser, final ParserState parent) {
 		this.parser = parser;
-		stateLap = new ParserStateLap(parser, this);
-		stateId = new ParserStateId(parser, this);
+		this.parent = parent;
 	}
 
 	@Override
 	public void handleStartElement(final XMLStreamReader xmlReader) {
-		String startElement = xmlReader.getLocalName();
-		if (TcxParser.ELEMENT_LAP.equalsIgnoreCase(startElement)) {
-			Lap newLap = new Lap();
-			newLap.setStartTime(parser.extractTimestamp(xmlReader.getAttributeValue(null, TcxParser.ELEMENT_LAP_PROPERTY_STARTTIME)));
-			stateLap.setLap(newLap);
-			parser.changeState(stateLap);
-		} else if (TcxParser.ELEMENT_ID.equalsIgnoreCase(startElement)) {
-			parser.changeState(stateId);
-		}
 	}
 
 	@Override
 	public void handleEndElement(final XMLStreamReader xmlReader) {
+		String endElement = xmlReader.getLocalName();
+		if (TcxParser.ELEMENT_ID.equalsIgnoreCase(endElement)) {
+			parser.changeState(parent);
+		}
 	}
 
 	@Override
 	public void handleCharacters(final XMLStreamReader xmlReader) {
+		String text = xmlReader.getText();
+		parser.getTrack().setStartTime(parser.extractTimestamp(text));
 	}
 }

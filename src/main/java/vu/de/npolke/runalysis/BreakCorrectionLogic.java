@@ -5,6 +5,17 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Copyright (C) 2015 Niklas Polke<br/>
+ * <br/>
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your option) any later version.<br/>
+ * <br/>
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * @author Niklas Polke
+ */
 public class BreakCorrectionLogic {
 
 	private static int lastIndexOfList(List<?> list) {
@@ -38,12 +49,12 @@ public class BreakCorrectionLogic {
 		lapToCorrect.setDistanceMeters(lapToCorrect.getDistanceMeters() - distanceDuringBreak);
 	}
 
-	public static void removeBreaksFromTrack(final List<Lap> laps) {
+	public static void removeBreaksFromTrack(final Track track) {
 		List<Lap> runningLaps = new ArrayList<Lap>();
 		List<Lap> breakLaps = new LinkedList<Lap>();
 
 		// divide laps into running and break laps
-		for (Lap lap : laps) {
+		for (Lap lap : track.getLaps()) {
 			if (LapIntensity.RESTING.equals(lap.getIntensity())) {
 				breakLaps.add(lap);
 			} else {
@@ -53,7 +64,7 @@ public class BreakCorrectionLogic {
 
 		// remove restingLaps
 		for (Lap breaklap : breakLaps) {
-			laps.remove(breaklap);
+			track.getLaps().remove(breaklap);
 		}
 
 		// correct time and distance in running laps with break(s)
