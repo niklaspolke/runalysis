@@ -107,7 +107,8 @@ public class MainFrame extends JFrame {
 		lapsTable.setEnabled(false);
 		lapsTable.setDefaultRenderer(Object.class, new TableCellRenderer());
 
-		JScrollPane scrollPane = new JScrollPane(lapsTable, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		JScrollPane scrollPane = new JScrollPane(lapsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		scrollPane.setBorder(new EmptyBorder(0, 0, 0, 0));
 
 		addComponent(getContentPane(), gridBagLayout, scrollPane, 0, 2, 1, 2);
