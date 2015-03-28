@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import org.junit.Test;
 
@@ -26,6 +27,7 @@ public class TimestampCellTest {
 	@Test
 	public void testTimestamp() throws ParseException {
 		SimpleDateFormat timestampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		timestampFormat.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
 		Date timestamp = timestampFormat.parse(TIMESTAMP1);
 		assertEquals(TIMESTAMP1, new TimestampCell(timestamp).toString());
 	}
