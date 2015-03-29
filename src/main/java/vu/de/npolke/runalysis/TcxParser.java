@@ -49,6 +49,9 @@ public class TcxParser {
 	private static final String TIMESTAMP_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 	private static final SimpleDateFormat TIMESTAMP_FORMATTER = new SimpleDateFormat(TIMESTAMP_FORMAT);
 
+	private static final String TIMESTAMP_FORMAT_SHORT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+	private static final SimpleDateFormat TIMESTAMP_FORMATTER_SHORT = new SimpleDateFormat(TIMESTAMP_FORMAT_SHORT);
+
 	private final String filename;
 	private InputStream inputStream;
 
@@ -144,7 +147,12 @@ public class TcxParser {
 		try {
 			timestamp = TIMESTAMP_FORMATTER.parse(timestampText);
 		} catch (ParseException e) {
-			e.printStackTrace();
+		}
+		if (timestamp == null) {
+			try {
+				timestamp = TIMESTAMP_FORMATTER_SHORT.parse(timestampText);
+			} catch (ParseException e) {
+			}
 		}
 		return timestamp;
 	}

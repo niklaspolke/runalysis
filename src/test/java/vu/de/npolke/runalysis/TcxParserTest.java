@@ -29,7 +29,7 @@ public class TcxParserTest {
 	private static final String FILE_NORMAL_TIMESTAMP_STRING = "2015-03-21T15:34:54.000Z";
 	private static Date FILE_NORMAL_TIMESTAMP;
 	private static final int FILE_NORMAL_AMOUNT_OF_LAPS = 1;
-	private static final int FILE_NORMAL_AMOUNT_OF_TRACKPOINTS = 69;
+	private static final int FILE_NORMAL_AMOUNT_OF_TRACKPOINTS = 65;
 	private static final double FILE_NORMAL_DURATION_IN_SECS = 62;
 	private static final double FILE_NORMAL_DISTANCE_IN_METERS = 165;
 
@@ -37,7 +37,7 @@ public class TcxParserTest {
 	private static final String FILE_LAPS_TIMESTAMP_STRING = "2015-03-21T15:36:53.000Z";
 	private static Date FILE_LAPS_TIMESTAMP;
 	private static final int FILE_LAPS_AMOUNT_OF_LAPS = 3;
-	private static final int FILE_LAPS_AMOUNT_OF_TRACKPOINTS = 70;
+	private static final int FILE_LAPS_AMOUNT_OF_TRACKPOINTS = 66;
 	private static final double FILE_LAPS_DURATION_IN_SECS = 63;
 	private static final double FILE_LAPS_DISTANCE_IN_METERS = 155;
 

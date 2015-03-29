@@ -7,12 +7,14 @@ import java.util.List;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
 
 import vu.de.npolke.runalysis.BreakCorrectionLogic;
 import vu.de.npolke.runalysis.Lap;
+import vu.de.npolke.runalysis.PaceCalculator;
 import vu.de.npolke.runalysis.TcxParser;
 import vu.de.npolke.runalysis.Track;
 import vu.de.npolke.runalysis.gui.cells.DistanceCell;
@@ -20,6 +22,9 @@ import vu.de.npolke.runalysis.gui.cells.DurationCell;
 import vu.de.npolke.runalysis.gui.cells.PaceCell;
 import vu.de.npolke.runalysis.gui.cells.TableCellRenderer;
 import vu.de.npolke.runalysis.gui.cells.TimestampCell;
+
+import com.xeiam.xchart.Chart;
+import com.xeiam.xchart.XChartPanel;
 
 /**
  * Copyright (C) 2015 Niklas Polke<br/>
@@ -36,10 +41,13 @@ import vu.de.npolke.runalysis.gui.cells.TimestampCell;
 public class MainFrame extends JFrame {
 
 	private static final String WINDOW_TITLE = "Runalysis by Niklas Polke";
-	private static final int WINDOW_WIDTH = 500;
-	private static final int WINDOW_HEIGHT = 200;
+	private static final int WINDOW_WIDTH = 1200;
+	private static final int WINDOW_HEIGHT = 400;
 	private static final int WINDOW_LOCATION_X = 400;
 	private static final int WINDOW_LOCATION_Y = 100;
+	private static final String CHART_SERIES_TITLE = "Pace (min/km)";
+	private static final int CHART_WIDTH = 800;
+	private static final int CHART_HEIGHT = 200;
 
 	private static final String[] TABLE_TRACK_COLUMN_NAMES = { "Start", "Distance", "Duration", "Pace" };
 	private static final String[] TABLE_LAPS_COLUMN_NAMES = { "Runde", "Distance", "Duration", "Pace" };
@@ -55,6 +63,8 @@ public class MainFrame extends JFrame {
 		getContentPane().setLayout(gridBagLayout);
 
 		setTrack(track);
+		setLaps(track.getLaps());
+		setPaces(PaceCalculator.calculatePace(track, 30));
 
 		setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 		setLocation(WINDOW_LOCATION_X, WINDOW_LOCATION_Y);
@@ -89,8 +99,6 @@ public class MainFrame extends JFrame {
 		scrollPane.setBorder(new EmptyBorder(0, 0, 0, 0));
 
 		addComponent(getContentPane(), gridBagLayout, scrollPane, 0, 0, 1, 1);
-
-		setLaps(track.getLaps());
 	}
 
 	private void setLaps(final List<Lap> laps) {
@@ -107,10 +115,22 @@ public class MainFrame extends JFrame {
 		lapsTable.setEnabled(false);
 		lapsTable.setDefaultRenderer(Object.class, new TableCellRenderer());
 
-		JScrollPane scrollPane = new JScrollPane(lapsTable, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		JScrollPane scrollPane = new JScrollPane(lapsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		scrollPane.setBorder(new EmptyBorder(0, 0, 0, 0));
 
 		addComponent(getContentPane(), gridBagLayout, scrollPane, 0, 2, 1, 2);
+	}
+
+	private void setPaces(final ChartPoints chartPoints) {
+
+		Chart chart = new Chart(CHART_WIDTH, CHART_HEIGHT);
+		chart.addSeries(CHART_SERIES_TITLE, chartPoints.getTimestamps(), chartPoints.getValues());
+		chart.getStyleManager().setYAxisMin(2);
+		chart.getStyleManager().setYAxisMax(9);
+		JPanel chartPanel = new XChartPanel(chart);
+
+		addComponent(getContentPane(), gridBagLayout, chartPanel, 0, 4, 1, 2);
 	}
 
 	public static void main(String[] args) {

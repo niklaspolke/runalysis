@@ -29,6 +29,8 @@ public class Trackpoint {
 
 	private double distanceMeters;
 
+	private BreakMarker breakMarker;
+
 	public Trackpoint() {
 	}
 
@@ -46,6 +48,14 @@ public class Trackpoint {
 
 	public void setDistanceMeters(final double distanceMeters) {
 		this.distanceMeters = distanceMeters;
+	}
+
+	public BreakMarker getBreakMarker() {
+		return breakMarker;
+	}
+
+	public void setBreakMarker(final BreakMarker breakMarker) {
+		this.breakMarker = breakMarker;
 	}
 
 	@Override
