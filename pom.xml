@@ -5,10 +5,41 @@
   <groupId>vu.de.npolke</groupId>
   <artifactId>runalysis</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0</version>
   
   <name>runalysis</name>
   <url>https://github.com/niklaspolke/runalysis</url>
+  
+  <developers>
+    <developer>
+      <name>Niklas Polke</name>
+      <timezone>+1</timezone>
+    </developer>
+  </developers>
+  
+  <licenses>
+    <license>
+      <name>GNU General Public License, Version 3</name>
+      <url>http://www.gnu.org/licenses/gpl-3.0-standalone.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/niklaspolke/runalysis/issues</url>
+  </issueManagement>
+  
+  <scm>
+    <connection>scm:git:git@github.com:niklaspolke/runalysis.git</connection>
+    <developerConnection>scm:git:git@github.com:niklaspolke/runalysis.git</developerConnection>
+    <url>git@github.com:niklaspolke/runalysis.git</url>
+    <tag>HEAD</tag>
+  </scm>
+  
+  <ciManagement>
+    <url>https://travis-ci.org/niklaspolke/runalysis</url>
+  </ciManagement>
   
   <properties>
     <maven.compiler.source>1.6</maven.compiler.source>
@@ -30,6 +61,26 @@
             </manifest>
           </archive>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.5.3</version>
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+            <descriptorRef>src</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+        <executions>
+          <execution>
+            <id>assembly-jar-Id</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
