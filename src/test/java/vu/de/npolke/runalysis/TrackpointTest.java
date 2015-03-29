@@ -32,6 +32,7 @@ public class TrackpointTest {
 	private static final Date TEST2_TIME = new Date(1427152669472l + 60000 + 3600000);
 	private static final double TEST2_DISTANCEMETERS = 1190.123;
 	private static final String TEST2_STRING = "Trackpoint: (01:18:49):  1190 m";
+	private static final BreakMarker TEST2_MARKER = BreakMarker.LAST_POINT_BEFORE_BREAK;
 
 	private Trackpoint testPoint;
 
@@ -56,6 +57,14 @@ public class TrackpointTest {
 
 		testPoint.setDistanceMeters(TEST2_DISTANCEMETERS);
 		assertEquals(TEST2_DISTANCEMETERS, testPoint.getDistanceMeters(), DELTA_ACCEPTED);
+	}
+
+	@Test
+	public void breakMarker() {
+		assertNull(testPoint.getBreakMarker());
+
+		testPoint.setBreakMarker(TEST2_MARKER);
+		assertEquals(TEST2_MARKER, testPoint.getBreakMarker());
 	}
 
 	@Test
