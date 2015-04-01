@@ -23,27 +23,27 @@ public class ChartPointsTest {
 	private static final long TIMESTAMP = new Date().getTime();
 	private static final Double VALUE = 3.5d;
 
-	private ChartPoints points;
+	private ChartPoints testPoints;
 
 	@Before
 	public void setup() {
-		points = new ChartPoints();
+		testPoints = new ChartPoints();
 	}
 
 	@Test
 	public void noPoints() {
-		assertEquals(0, points.getTimestamps().size());
-		assertEquals(0, points.getValues().size());
+		assertEquals(0, testPoints.getTimestamps().size());
+		assertEquals(0, testPoints.getValues().size());
 	}
 
 	@Test
 	public void onePoint() {
-		points.addChartPoint(TIMESTAMP, VALUE);
+		testPoints.addChartPoint(TIMESTAMP, VALUE);
 
-		assertEquals(1, points.getTimestamps().size());
-		assertEquals(1, points.getValues().size());
+		assertEquals(1, testPoints.getTimestamps().size());
+		assertEquals(1, testPoints.getValues().size());
 
-		assertTrue(points.getTimestamps().contains(new Date(TIMESTAMP)));
-		assertTrue(points.getValues().contains(VALUE));
+		assertTrue(testPoints.getTimestamps().contains(new Date(TIMESTAMP)));
+		assertTrue(testPoints.getValues().contains(VALUE));
 	}
 }
