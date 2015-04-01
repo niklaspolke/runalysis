@@ -21,8 +21,8 @@ public class ChartPoints {
 
 	private Collection<Double> values = new ArrayList<Double>();
 
-	public void addChartPoint(final Date timestamp, final Double value) {
-		timestamps.add(timestamp);
+	public void addChartPoint(final long timestampMillis, final Double value) {
+		timestamps.add(new Date(timestampMillis));
 		values.add(value);
 	}
 

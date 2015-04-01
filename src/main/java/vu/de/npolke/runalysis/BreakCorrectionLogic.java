@@ -39,7 +39,7 @@ public class BreakCorrectionLogic {
 
 		// break starts one trackpoint after the break's start time
 		int pointIndex = 0;
-		while (pointsOfLapWithBreak.get(pointIndex).getTime().compareTo(breakStartTime) <= 0) {
+		while (pointsOfLapWithBreak.get(pointIndex).getTimestampMillis() <= breakStartTime.getTime()) {
 			pointIndex++;
 		}
 		Trackpoint breakStartPoint = pointsOfLapWithBreak.get(pointIndex);
@@ -55,30 +55,11 @@ public class BreakCorrectionLogic {
 		pointsOfLapWithBreak.remove(pointIndex + 1);
 
 		// calculate distance gone within break
-		double distanceDuringBreak = breakEndPoint.getDistanceMeters() - breakStartPoint.getDistanceMeters();
+		double distanceDuringBreak = breakEndPoint.getRecordedDistanceMeters() - breakStartPoint.getRecordedDistanceMeters();
 
-		// 1c correct break following Trackpoints
-		for (Trackpoint point : pointsOfLapWithBreak.subList(pointIndex + 1, pointsOfLapWithBreak.size())) {
-			correctDistanceOfPoint(point, distanceDuringBreak);
-		}
-
-		// 1d correct Lap's distance and duration
+		// 1c correct Lap's distance and duration
 		lapWithBreak.setTotalTimeSeconds(lapWithBreak.getTotalTimeSeconds() - breakDuration);
 		lapWithBreak.setDistanceMeters(lapWithBreak.getDistanceMeters() - distanceDuringBreak);
-
-		// 2. correct Trackpoints of following laps
-		if (indexOfLapWithBreak + 1 < runningLaps.size()) {
-			for (Lap breakFollowingLap : runningLaps.subList(indexOfLapWithBreak + 1, runningLaps.size())) {
-				// 2a correct all Trackpoints
-				for (Trackpoint pointOfBreakFollowingLap : breakFollowingLap.getPoints()) {
-					correctDistanceOfPoint(pointOfBreakFollowingLap, distanceDuringBreak);
-				}
-			}
-		}
-	}
-
-	private static void correctDistanceOfPoint(final Trackpoint point, final double distanceToReduce) {
-		point.setDistanceMeters(point.getDistanceMeters() - distanceToReduce);
 	}
 
 	public static void removeBreaksFromTrack(final Track track) {

@@ -3,7 +3,6 @@ package vu.de.npolke.runalysis.states;
 import javax.xml.stream.XMLStreamReader;
 
 import vu.de.npolke.runalysis.TcxParser;
-import vu.de.npolke.runalysis.Trackpoint;
 
 /**
  * Copyright (C) 2015 Niklas Polke<br/>
@@ -20,17 +19,11 @@ public class ParserStatePointTime implements ParserState {
 
 	private final TcxParser parser;
 
-	private final ParserState parent;
+	private final ParserStatePoint parentStatePoint;
 
-	private Trackpoint point;
-
-	public ParserStatePointTime(final TcxParser parser, final ParserState parent) {
+	public ParserStatePointTime(final TcxParser parser, final ParserStatePoint parent) {
 		this.parser = parser;
-		this.parent = parent;
-	}
-
-	public void setPoint(final Trackpoint point) {
-		this.point = point;
+		parentStatePoint = parent;
 	}
 
 	@Override
@@ -41,13 +34,13 @@ public class ParserStatePointTime implements ParserState {
 	public void handleEndElement(final XMLStreamReader xmlReader) {
 		String endElement = xmlReader.getLocalName();
 		if (TcxParser.ELEMENT_POINT_TIME.equalsIgnoreCase(endElement)) {
-			parser.changeState(parent);
+			parser.changeState(parentStatePoint);
 		}
 	}
 
 	@Override
 	public void handleCharacters(final XMLStreamReader xmlReader) {
 		String text = xmlReader.getText();
-		point.setTime(parser.extractTimestamp(text));
+		parentStatePoint.setTimestampMillis(parser.extractTimestamp(text).getTime());
 	}
 }

@@ -20,7 +20,7 @@ import org.junit.Test;
  */
 public class ChartPointsTest {
 
-	private static final Date TIMESTAMP = new Date();
+	private static final long TIMESTAMP = new Date().getTime();
 	private static final Double VALUE = 3.5d;
 
 	private ChartPoints points;
@@ -43,7 +43,7 @@ public class ChartPointsTest {
 		assertEquals(1, points.getTimestamps().size());
 		assertEquals(1, points.getValues().size());
 
-		assertTrue(points.getTimestamps().contains(TIMESTAMP));
+		assertTrue(points.getTimestamps().contains(new Date(TIMESTAMP)));
 		assertTrue(points.getValues().contains(VALUE));
 	}
 }

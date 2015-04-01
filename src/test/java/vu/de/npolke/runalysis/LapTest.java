@@ -84,8 +84,8 @@ public class LapTest {
 	public void points() {
 		assertTrue(testLap.getPoints().isEmpty());
 
-		Trackpoint point1 = new Trackpoint();
-		Trackpoint point2 = new Trackpoint();
+		Trackpoint point1 = new Trackpoint(123, 10);
+		Trackpoint point2 = new Trackpoint(234, 20);
 		testLap.addPoint(point1);
 		testLap.addPoint(point2);
 

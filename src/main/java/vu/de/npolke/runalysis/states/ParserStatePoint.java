@@ -20,20 +20,32 @@ public class ParserStatePoint implements ParserState {
 
 	private final TcxParser parser;
 
-	private final ParserState parent;
+	private final ParserStateLap parentStateLap;
 	private final ParserStatePointDistance statePointDistance;
 	private final ParserStatePointTime statePointTime;
 
-	public ParserStatePoint(final TcxParser parser, final ParserState parent) {
+	private long timestampMillis;
+
+	private double recordedDistanceMeters;
+
+	public ParserStatePoint(final TcxParser parser, final ParserStateLap parent) {
 		this.parser = parser;
-		this.parent = parent;
+		parentStateLap = parent;
 		statePointDistance = new ParserStatePointDistance(parser, this);
 		statePointTime = new ParserStatePointTime(parser, this);
 	}
 
-	public void setPoint(final Trackpoint point) {
-		statePointDistance.setPoint(point);
-		statePointTime.setPoint(point);
+	public void setTimestampMillis(long timestampMillis) {
+		this.timestampMillis = timestampMillis;
+	}
+
+	public void setRecorededDistanceMeters(double recorededDistanceMeters) {
+		recordedDistanceMeters = recorededDistanceMeters;
+	}
+
+	private void reset() {
+		timestampMillis = 0;
+		recordedDistanceMeters = 0;
 	}
 
 	@Override
@@ -50,7 +62,10 @@ public class ParserStatePoint implements ParserState {
 	public void handleEndElement(final XMLStreamReader xmlReader) {
 		String endElement = xmlReader.getLocalName();
 		if (TcxParser.ELEMENT_POINT.equalsIgnoreCase(endElement)) {
-			parser.changeState(parent);
+			Trackpoint newPoint = new Trackpoint(timestampMillis, recordedDistanceMeters);
+			reset();
+			parentStateLap.addTrackpoint(newPoint);
+			parser.changeState(parentStateLap);
 		}
 	}
 

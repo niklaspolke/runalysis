@@ -28,16 +28,16 @@ public class PaceCalculator {
 				if (predecessorPoint == null || BreakMarker.FIRST_POINT_AFTER_BREAK.equals(actualPoint.getBreakMarker())) {
 					predecessorPoint = actualPoint;
 				} else {
-					timeDifferenceInMilliseconds = actualPoint.getTime().getTime() - predecessorPoint.getTime().getTime();
+					timeDifferenceInMilliseconds = actualPoint.getTimestampMillis() - predecessorPoint.getTimestampMillis();
 
 					// do not take every Trackpoint to get a less chaotic diagram
 					if (timeDifferenceInMilliseconds >= timeIntervalInSeconds * 1000
 							|| BreakMarker.LAST_POINT_BEFORE_BREAK.equals(actualPoint.getBreakMarker())) {
-						distanceDifferenceInMeters = actualPoint.getDistanceMeters() - predecessorPoint.getDistanceMeters();
+						distanceDifferenceInMeters = actualPoint.getRecordedDistanceMeters() - predecessorPoint.getRecordedDistanceMeters();
 
 						paceInMinPerKilometer = timeDifferenceInMilliseconds / (distanceDifferenceInMeters / 1000d) / 60000d;
 
-						chartPoints.addChartPoint(actualPoint.getTime(), paceInMinPerKilometer);
+						chartPoints.addChartPoint(actualPoint.getTimestampMillis(), paceInMinPerKilometer);
 
 						predecessorPoint = actualPoint;
 					}

@@ -38,6 +38,10 @@ public class ParserStateLap implements ParserState {
 		statePoint = new ParserStatePoint(parser, this);
 	}
 
+	public void addTrackpoint(final Trackpoint newPoint) {
+		lap.addPoint(newPoint);
+	}
+
 	public void setLap(final Lap lap) {
 		this.lap = lap;
 		stateLapDistance.setLap(lap);
@@ -55,9 +59,6 @@ public class ParserStateLap implements ParserState {
 		} else if (TcxParser.ELEMENT_LAP_INTENSITY.equalsIgnoreCase(startElement)) {
 			parser.changeState(stateLapIntensity);
 		} else if (TcxParser.ELEMENT_POINT.equalsIgnoreCase(startElement)) {
-			Trackpoint point = new Trackpoint();
-			lap.addPoint(point);
-			statePoint.setPoint(point);
 			parser.changeState(statePoint);
 		}
 	}
