@@ -29,6 +29,6 @@ public class TimestampCellTest {
 		SimpleDateFormat timestampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		timestampFormat.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
 		Date timestamp = timestampFormat.parse(TIMESTAMP1);
-		assertEquals(TIMESTAMP1, new TimestampCell(timestamp).toString());
+		assertEquals(TIMESTAMP1, new TimestampCell(timestamp.getTime()).toString());
 	}
 }

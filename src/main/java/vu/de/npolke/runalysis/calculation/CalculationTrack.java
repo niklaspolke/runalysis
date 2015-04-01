@@ -41,12 +41,12 @@ public class CalculationTrack {
 		}
 	}
 
-	public long getRunDurationInMilliseconds() {
-		long runDurationInMilliseconds = 0;
+	public long getRunDurationInSeconds() {
+		long runDurationInSeconds = 0;
 		for (CalculationLap lap : laps) {
-			runDurationInMilliseconds += lap.getRunDurationInMilliseconds();
+			runDurationInSeconds += lap.getRunDurationInSeconds();
 		}
-		return runDurationInMilliseconds;
+		return runDurationInSeconds;
 	}
 
 	public double getRunDistanceInMeters() {

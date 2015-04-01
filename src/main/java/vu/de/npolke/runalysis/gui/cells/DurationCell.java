@@ -24,8 +24,8 @@ public class DurationCell {
 
 	private final long durationInMilliseconds;
 
-	public DurationCell(final double durationInSeconds) {
-		durationInMilliseconds = (long) (durationInSeconds * 1000);
+	public DurationCell(final long durationInSeconds) {
+		durationInMilliseconds = durationInSeconds * 1000;
 
 		TIME_FORMAT_SHORT.setTimeZone(TimeZone.getTimeZone("UTC"));
 		TIME_FORMAT_LONG.setTimeZone(TimeZone.getTimeZone("UTC"));

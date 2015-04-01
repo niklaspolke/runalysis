@@ -13,17 +13,17 @@ package vu.de.npolke.runalysis.calculation;
  */
 public class CalculationLap {
 
-	private final long runDurationInMilliseconds;
+	private final long runDurationInSeconds;
 
 	private final double runDistanceInMeters;
 
-	public CalculationLap(final long runDurationInMilliseconds, final double runDistanceInMeters) {
-		this.runDurationInMilliseconds = runDurationInMilliseconds;
+	public CalculationLap(final long runDurationInSeconds, final double runDistanceInMeters) {
+		this.runDurationInSeconds = runDurationInSeconds;
 		this.runDistanceInMeters = runDistanceInMeters;
 	}
 
-	public long getRunDurationInMilliseconds() {
-		return runDurationInMilliseconds;
+	public long getRunDurationInSeconds() {
+		return runDurationInSeconds;
 	}
 
 	public double getRunDistanceInMeters() {

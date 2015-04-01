@@ -26,9 +26,9 @@ public class CalculationTrackTest {
 	private static final CalculationTrackpointDecorator TRACKPOINT_1 = new CalculationTrackpointDecorator(new Trackpoint(START_TIME, 123));
 	private static final CalculationTrackpointDecorator TRACKPOINT_2 = new CalculationTrackpointDecorator(new Trackpoint(6666, 234));
 
-	private static final long DURATION_1 = 112;
-	private static final long DURATION_2 = 223;
-	private static final long DURATION_3 = 334;
+	private static final long DURATION_1 = 112000;
+	private static final long DURATION_2 = 223000;
+	private static final long DURATION_3 = 334000;
 	private static final double DISTANCE_1 = 22.3;
 	private static final double DISTANCE_2 = 33.4;
 	private static final double DISTANCE_3 = 44.5;
@@ -78,9 +78,9 @@ public class CalculationTrackTest {
 
 	@Test
 	public void runDuration() {
-		assertEquals(0, emptyTestTrack.getRunDurationInMilliseconds());
+		assertEquals(0, emptyTestTrack.getRunDurationInSeconds());
 
-		assertEquals(DURATION_1 + DURATION_2 + DURATION_3, testTrack.getRunDurationInMilliseconds());
+		assertEquals(DURATION_1 + DURATION_2 + DURATION_3, testTrack.getRunDurationInSeconds());
 	}
 
 	@Test

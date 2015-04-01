@@ -5,6 +5,10 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import vu.de.npolke.runalysis.calculation.CalculationLap;
+import vu.de.npolke.runalysis.calculation.CalculationTrack;
+import vu.de.npolke.runalysis.calculation.CalculationTrackpointDecorator;
+
 /**
  * Copyright (C) 2015 Niklas Polke<br/>
  * <br/>
@@ -62,7 +66,7 @@ public class BreakCorrectionLogic {
 		lapWithBreak.setDistanceMeters(lapWithBreak.getDistanceMeters() - distanceDuringBreak);
 	}
 
-	public static void removeBreaksFromTrack(final Track track) {
+	public static CalculationTrack removeBreaksFromTrack(final Track track) {
 		List<Lap> runningLaps = new ArrayList<Lap>();
 		List<Lap> breakLaps = new LinkedList<Lap>();
 
@@ -88,5 +92,16 @@ public class BreakCorrectionLogic {
 			// correct time and distance
 			correctLaps(runningLaps, indexRunningLapWithBreak, breakLap.getStartTime(), breakLap.getTotalTimeSeconds());
 		}
+
+		CalculationTrack calcTrack = new CalculationTrack();
+
+		for (Lap lap : track.getLaps()) {
+			calcTrack.getLaps().add(new CalculationLap((long) lap.getTotalTimeSeconds(), lap.getDistanceMeters()));
+			for (Trackpoint point : lap.getPoints()) {
+				calcTrack.getTrackpoints().add(new CalculationTrackpointDecorator(point));
+			}
+		}
+
+		return calcTrack;
 	}
 }

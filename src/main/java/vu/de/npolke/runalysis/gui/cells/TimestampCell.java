@@ -21,8 +21,8 @@ public class TimestampCell {
 
 	private final Date timestamp;
 
-	public TimestampCell(final Date timestamp) {
-		this.timestamp = (Date) timestamp.clone();
+	public TimestampCell(final long timestamp) {
+		this.timestamp = new Date(timestamp);
 
 		TIMESTAMP_FORMAT.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
 	}

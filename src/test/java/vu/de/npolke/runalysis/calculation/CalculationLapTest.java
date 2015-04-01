@@ -20,19 +20,19 @@ public class CalculationLapTest {
 
 	private static final double DELTA_ACCEPTED = 0.001;
 
-	private static final long RUN_DURATION_IN_MILLISECONDS = 123456789123l;
+	private static final long RUN_DURATION_IN_SECONDS = 123456789123l;
 	private static final double RUN_DISTANCE_IN_METERS = 150.531;
 
 	private static CalculationLap testLap;
 
 	@BeforeClass
 	public static void setup() {
-		testLap = new CalculationLap(RUN_DURATION_IN_MILLISECONDS, RUN_DISTANCE_IN_METERS);
+		testLap = new CalculationLap(RUN_DURATION_IN_SECONDS, RUN_DISTANCE_IN_METERS);
 	}
 
 	@Test
 	public void runDuration() {
-		assertEquals(RUN_DURATION_IN_MILLISECONDS, testLap.getRunDurationInMilliseconds());
+		assertEquals(RUN_DURATION_IN_SECONDS, testLap.getRunDurationInSeconds());
 	}
 
 	@Test

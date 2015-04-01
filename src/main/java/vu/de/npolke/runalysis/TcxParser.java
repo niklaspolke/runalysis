@@ -16,6 +16,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import vu.de.npolke.runalysis.calculation.CalculationTrack;
 import vu.de.npolke.runalysis.states.ParserState;
 import vu.de.npolke.runalysis.states.ParserStateDefault;
 
@@ -180,13 +181,13 @@ public class TcxParser {
 			System.out.println(" # trackpoints: " + String.format("%7d", parser.getAmountOfPoints()));
 			System.out.println();
 			System.out.println("Correcting breaks...");
-			BreakCorrectionLogic.removeBreaksFromTrack(parser.getTrack());
+			CalculationTrack track = BreakCorrectionLogic.removeBreaksFromTrack(parser.getTrack());
 			System.out.println("Correcting breaks... done.");
 			System.out.println();
-			System.out.println("track duration: " + formatAsDuration(parser.getTrack().getTotalTimeSeconds()) + " h");
-			System.out.println("track distance: " + String.format("%7.0f", parser.getTrack().getDistanceMeters()) + " m");
-			System.out.println("        # laps: " + String.format("%7d", parser.getTrack().getLaps().size()));
-			System.out.println(" # trackpoints: " + String.format("%7d", parser.getAmountOfPoints()));
+			System.out.println("track duration: " + formatAsDuration(track.getRunDurationInSeconds()) + " h");
+			System.out.println("track distance: " + String.format("%7.0f", track.getRunDistanceInMeters()) + " m");
+			System.out.println("        # laps: " + String.format("%7d", track.getLaps().size()));
+			System.out.println(" # trackpoints: " + String.format("%7d", track.getTrackpoints().size()));
 		}
 	}
 }
