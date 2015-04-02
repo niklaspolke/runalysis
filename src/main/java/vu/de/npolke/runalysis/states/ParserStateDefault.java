@@ -2,7 +2,6 @@ package vu.de.npolke.runalysis.states;
 
 import javax.xml.stream.XMLStreamReader;
 
-import vu.de.npolke.runalysis.Lap;
 import vu.de.npolke.runalysis.TcxParser;
 
 /**
@@ -33,9 +32,8 @@ public class ParserStateDefault implements ParserState {
 	public void handleStartElement(final XMLStreamReader xmlReader) {
 		String startElement = xmlReader.getLocalName();
 		if (TcxParser.ELEMENT_LAP.equalsIgnoreCase(startElement)) {
-			Lap newLap = new Lap();
-			newLap.setStartTime(parser.extractTimestamp(xmlReader.getAttributeValue(null, TcxParser.ELEMENT_LAP_PROPERTY_STARTTIME)));
-			stateLap.setLap(newLap);
+			stateLap.setStartTimestampMillis(parser.extractTimestamp(
+					xmlReader.getAttributeValue(null, TcxParser.ELEMENT_LAP_PROPERTY_STARTTIME)).getTime());
 			parser.changeState(stateLap);
 		} else if (TcxParser.ELEMENT_ID.equalsIgnoreCase(startElement)) {
 			parser.changeState(stateId);

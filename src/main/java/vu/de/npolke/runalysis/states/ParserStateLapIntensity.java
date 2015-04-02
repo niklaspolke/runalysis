@@ -2,7 +2,6 @@ package vu.de.npolke.runalysis.states;
 
 import javax.xml.stream.XMLStreamReader;
 
-import vu.de.npolke.runalysis.Lap;
 import vu.de.npolke.runalysis.LapIntensity;
 import vu.de.npolke.runalysis.TcxParser;
 
@@ -21,17 +20,11 @@ public class ParserStateLapIntensity implements ParserState {
 
 	private final TcxParser parser;
 
-	private final ParserState parent;
+	private final ParserStateLap parent;
 
-	private Lap lap;
-
-	public ParserStateLapIntensity(final TcxParser parser, final ParserState parent) {
+	public ParserStateLapIntensity(final TcxParser parser, final ParserStateLap parent) {
 		this.parser = parser;
 		this.parent = parent;
-	}
-
-	public void setLap(final Lap lap) {
-		this.lap = lap;
 	}
 
 	@Override
@@ -49,6 +42,6 @@ public class ParserStateLapIntensity implements ParserState {
 	@Override
 	public void handleCharacters(final XMLStreamReader xmlReader) {
 		String text = xmlReader.getText();
-		lap.setIntensity(LapIntensity.valueOf(text.toUpperCase()));
+		parent.setIntensity(LapIntensity.valueOf(text.toUpperCase()));
 	}
 }

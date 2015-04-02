@@ -43,16 +43,12 @@ public class TrackTest {
 	public void setup() {
 		testTrack = new Track();
 		testTrack.setStartTime(TEST1_STARTTIME);
-		Lap lap = new Lap();
-		lap.setDistanceMeters(TEST1_LAP1_DISTANCEMETERS);
-		lap.setTotalTimeSeconds(TEST1_LAP1_TOTALTIMESECONDS);
+		Lap lap = new Lap(123, TEST1_LAP1_TOTALTIMESECONDS, TEST1_LAP1_DISTANCEMETERS, LapIntensity.ACTIVE, null);
 		testTrack.addLap(lap);
 
 		testTrack2 = new Track();
 		testTrack2.setStartTime(TEST2_STARTTIME);
-		Lap lap2 = new Lap();
-		lap2.setDistanceMeters(TEST2_LAP2_DISTANCEMETERS);
-		lap2.setTotalTimeSeconds(TEST2_LAP2_TOTALTIMESECONDS);
+		Lap lap2 = new Lap(123, TEST2_LAP2_TOTALTIMESECONDS, TEST2_LAP2_DISTANCEMETERS, LapIntensity.ACTIVE, null);
 		testTrack2.addLap(lap);
 		testTrack2.addLap(lap2);
 	}

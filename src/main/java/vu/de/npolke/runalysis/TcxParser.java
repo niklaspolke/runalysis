@@ -143,6 +143,7 @@ public class TcxParser {
 		}
 	}
 
+	// TODO: correct to timestampMilliseconds/long ?
 	public Date extractTimestamp(final String timestampText) {
 		Date timestamp = null;
 		try {

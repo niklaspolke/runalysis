@@ -50,7 +50,7 @@ public class Track {
 	public double getTotalTimeSeconds() {
 		double durationInSeconds = 0;
 		for (Lap lap : getLaps()) {
-			durationInSeconds += lap.getTotalTimeSeconds();
+			durationInSeconds += lap.getRecordedTotalTimeSeconds();
 		}
 		return durationInSeconds;
 	}
@@ -58,7 +58,7 @@ public class Track {
 	public double getDistanceMeters() {
 		double distanceInMeters = 0;
 		for (Lap lap : getLaps()) {
-			distanceInMeters += lap.getDistanceMeters();
+			distanceInMeters += lap.getRecordedDistanceMeters();
 		}
 		return distanceInMeters;
 	}

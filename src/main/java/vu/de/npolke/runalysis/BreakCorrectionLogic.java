@@ -24,7 +24,7 @@ public class BreakCorrectionLogic {
 	private static boolean isStartOfBreak(final CalculationTrackpointDecorator trackpoint, final Deque<Lap> breakLapsStack) {
 		boolean isStartOfBreak = false;
 		if (breakLapsStack.isEmpty() == false) {
-			isStartOfBreak = trackpoint.getTimestampMillis() > breakLapsStack.peek().getStartTime().getTime();
+			isStartOfBreak = trackpoint.getTimestampMillis() > breakLapsStack.peek().getStartTimestampMillis();
 		}
 		return isStartOfBreak;
 	}

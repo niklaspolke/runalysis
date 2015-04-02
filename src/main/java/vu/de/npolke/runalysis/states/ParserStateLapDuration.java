@@ -2,7 +2,6 @@ package vu.de.npolke.runalysis.states;
 
 import javax.xml.stream.XMLStreamReader;
 
-import vu.de.npolke.runalysis.Lap;
 import vu.de.npolke.runalysis.TcxParser;
 
 /**
@@ -20,17 +19,11 @@ public class ParserStateLapDuration implements ParserState {
 
 	private final TcxParser parser;
 
-	private final ParserState parent;
+	private final ParserStateLap parent;
 
-	private Lap lap;
-
-	public ParserStateLapDuration(final TcxParser parser, final ParserState parent) {
+	public ParserStateLapDuration(final TcxParser parser, final ParserStateLap parent) {
 		this.parser = parser;
 		this.parent = parent;
-	}
-
-	public void setLap(final Lap lap) {
-		this.lap = lap;
 	}
 
 	@Override
@@ -48,6 +41,6 @@ public class ParserStateLapDuration implements ParserState {
 	@Override
 	public void handleCharacters(final XMLStreamReader xmlReader) {
 		String text = xmlReader.getText();
-		lap.setTotalTimeSeconds(Double.parseDouble(text));
+		parent.setRecordedTotalTimeSeconds(Double.parseDouble(text));
 	}
 }
