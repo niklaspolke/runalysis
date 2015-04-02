@@ -1,4 +1,4 @@
-package vu.de.npolke.runalysis;
+package vu.de.npolke.runalysis.calculation;
 
 import static org.junit.Assert.*;
 
@@ -16,28 +16,27 @@ import org.junit.Test;
  *
  * @author Niklas Polke
  */
-public class TrackpointTest {
+public class CalculationLapTest {
 
 	private static final double DELTA_ACCEPTED = 0.001;
 
-	// 2015-03-24 0:17:49 GMT
-	private static final long TIMESTAMP_MILLIS = 123456789123l;
-	private static final double DISTANCE_METERS = 150.531;
+	private static final long RUN_DURATION_IN_SECONDS = 123456789123l;
+	private static final double RUN_DISTANCE_IN_METERS = 150.531;
 
-	private static Trackpoint testPoint;
+	private static CalculationLap testLap;
 
 	@BeforeClass
 	public static void setup() {
-		testPoint = new Trackpoint(TIMESTAMP_MILLIS, DISTANCE_METERS);
+		testLap = new CalculationLap(RUN_DURATION_IN_SECONDS, RUN_DISTANCE_IN_METERS);
 	}
 
 	@Test
-	public void timestamp() {
-		assertEquals(TIMESTAMP_MILLIS, testPoint.getTimestampMillis());
+	public void runDuration() {
+		assertEquals(RUN_DURATION_IN_SECONDS, testLap.getRunDurationInSeconds());
 	}
 
 	@Test
-	public void distance() {
-		assertEquals(DISTANCE_METERS, testPoint.getRecordedDistanceMeters(), DELTA_ACCEPTED);
+	public void runDdistance() {
+		assertEquals(RUN_DISTANCE_IN_METERS, testLap.getRunDistanceInMeters(), DELTA_ACCEPTED);
 	}
 }

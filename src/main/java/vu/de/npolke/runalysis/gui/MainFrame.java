@@ -13,10 +13,10 @@ import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
 
 import vu.de.npolke.runalysis.BreakCorrectionLogic;
-import vu.de.npolke.runalysis.Lap;
 import vu.de.npolke.runalysis.PaceCalculator;
 import vu.de.npolke.runalysis.TcxParser;
-import vu.de.npolke.runalysis.Track;
+import vu.de.npolke.runalysis.calculation.CalculationLap;
+import vu.de.npolke.runalysis.calculation.CalculationTrack;
 import vu.de.npolke.runalysis.gui.cells.DistanceCell;
 import vu.de.npolke.runalysis.gui.cells.DurationCell;
 import vu.de.npolke.runalysis.gui.cells.PaceCell;
@@ -56,7 +56,7 @@ public class MainFrame extends JFrame {
 	private JTable lapsTable;
 	private GridBagLayout gridBagLayout;
 
-	public MainFrame(final Track track) {
+	public MainFrame(final CalculationTrack track) {
 		super(WINDOW_TITLE);
 
 		gridBagLayout = new GridBagLayout();
@@ -85,12 +85,12 @@ public class MainFrame extends JFrame {
 		container.add(component);
 	}
 
-	private void setTrack(final Track track) {
+	private void setTrack(final CalculationTrack track) {
 		Object[][] data = new Object[1][4];
-		data[0][0] = new TimestampCell(track.getStartTime());
-		data[0][1] = new DistanceCell(track.getDistanceMeters());
-		data[0][2] = new DurationCell(track.getTotalTimeSeconds());
-		data[0][3] = new PaceCell(track.getTotalTimeSeconds(), track.getDistanceMeters());
+		data[0][0] = new TimestampCell(track.getStartTimestamp());
+		data[0][1] = new DistanceCell(track.getRunDistanceInMeters());
+		data[0][2] = new DurationCell(track.getRunDurationInSeconds());
+		data[0][3] = new PaceCell(track.getRunDurationInSeconds(), track.getRunDistanceInMeters());
 		trackTable = new JTable(data, TABLE_TRACK_COLUMN_NAMES);
 		trackTable.setEnabled(false);
 		trackTable.setDefaultRenderer(Object.class, new TableCellRenderer());
@@ -101,14 +101,14 @@ public class MainFrame extends JFrame {
 		addComponent(getContentPane(), gridBagLayout, scrollPane, 0, 0, 1, 1);
 	}
 
-	private void setLaps(final List<Lap> laps) {
+	private void setLaps(final List<CalculationLap> laps) {
 		Object[][] data = new Object[laps.size()][4];
 		int lapIndex = 0;
-		for (Lap lap : laps) {
+		for (CalculationLap lap : laps) {
 			data[lapIndex][0] = "" + (lapIndex + 1);
-			data[lapIndex][1] = new DistanceCell(lap.getDistanceMeters());
-			data[lapIndex][2] = new DurationCell(lap.getTotalTimeSeconds());
-			data[lapIndex][3] = new PaceCell(lap.getTotalTimeSeconds(), lap.getDistanceMeters());
+			data[lapIndex][1] = new DistanceCell(lap.getRunDistanceInMeters());
+			data[lapIndex][2] = new DurationCell(lap.getRunDurationInSeconds());
+			data[lapIndex][3] = new PaceCell(lap.getRunDurationInSeconds(), lap.getRunDistanceInMeters());
 			lapIndex++;
 		}
 		lapsTable = new JTable(data, TABLE_LAPS_COLUMN_NAMES);
@@ -139,8 +139,8 @@ public class MainFrame extends JFrame {
 		} else {
 			TcxParser parser = new TcxParser(args[0]);
 			parser.readFile();
-			BreakCorrectionLogic.removeBreaksFromTrack(parser.getTrack());
-			MainFrame frame = new MainFrame(parser.getTrack());
+			CalculationTrack track = BreakCorrectionLogic.removeBreaksFromTrack(parser.getTrack());
+			MainFrame frame = new MainFrame(track);
 			frame.setVisible(true);
 		}
 	}

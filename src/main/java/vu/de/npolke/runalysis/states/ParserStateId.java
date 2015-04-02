@@ -19,9 +19,9 @@ public class ParserStateId implements ParserState {
 
 	private final TcxParser parser;
 
-	private final ParserState parent;
+	private final ParserStateDefault parent;
 
-	public ParserStateId(final TcxParser parser, final ParserState parent) {
+	public ParserStateId(final TcxParser parser, final ParserStateDefault parent) {
 		this.parser = parser;
 		this.parent = parent;
 	}
@@ -41,6 +41,6 @@ public class ParserStateId implements ParserState {
 	@Override
 	public void handleCharacters(final XMLStreamReader xmlReader) {
 		String text = xmlReader.getText();
-		parser.getTrack().setStartTime(parser.extractTimestamp(text));
+		parent.setStartTimestampMillis(parser.extractTimestampMillis(text));
 	}
 }

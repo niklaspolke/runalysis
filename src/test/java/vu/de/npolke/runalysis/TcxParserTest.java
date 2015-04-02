@@ -8,6 +8,8 @@ import java.util.Date;
 
 import org.junit.Test;
 
+import vu.de.npolke.runalysis.calculation.CalculationTrack;
+
 /**
  * Copyright (C) 2015 Niklas Polke<br/>
  * <br/>
@@ -55,13 +57,13 @@ public class TcxParserTest {
 		TcxParser parser = new TcxParser(FILE_NORMAL, getClass().getResourceAsStream(FILE_NORMAL));
 
 		parser.readFile();
-		BreakCorrectionLogic.removeBreaksFromTrack(parser.getTrack());
+		CalculationTrack track = BreakCorrectionLogic.removeBreaksFromTrack(parser.getTrack());
 
-		assertEquals(FILE_NORMAL_TIMESTAMP, parser.getTrack().getStartTime());
-		assertEquals(FILE_NORMAL_AMOUNT_OF_LAPS, parser.getTrack().getLaps().size());
-		assertEquals(FILE_NORMAL_AMOUNT_OF_TRACKPOINTS, parser.getAmountOfPoints());
-		assertEquals(FILE_NORMAL_DURATION_IN_SECS, parser.getTrack().getTotalTimeSeconds(), DELTA_ACCEPTED);
-		assertEquals(FILE_NORMAL_DISTANCE_IN_METERS, parser.getTrack().getDistanceMeters(), DELTA_ACCEPTED);
+		assertEquals(FILE_NORMAL_TIMESTAMP.getTime(), track.getStartTimestamp());
+		assertEquals(FILE_NORMAL_AMOUNT_OF_LAPS, track.getLaps().size());
+		assertEquals(FILE_NORMAL_AMOUNT_OF_TRACKPOINTS, track.getTrackpoints().size());
+		assertEquals(FILE_NORMAL_DURATION_IN_SECS, track.getRunDurationInSeconds(), DELTA_ACCEPTED);
+		assertEquals(FILE_NORMAL_DISTANCE_IN_METERS, track.getRunDistanceInMeters(), DELTA_ACCEPTED);
 	}
 
 	@Test
@@ -69,13 +71,13 @@ public class TcxParserTest {
 		TcxParser parser = new TcxParser(FILE_LAPS, getClass().getResourceAsStream(FILE_LAPS));
 
 		parser.readFile();
-		BreakCorrectionLogic.removeBreaksFromTrack(parser.getTrack());
+		CalculationTrack track = BreakCorrectionLogic.removeBreaksFromTrack(parser.getTrack());
 
-		assertEquals(FILE_LAPS_TIMESTAMP, parser.getTrack().getStartTime());
-		assertEquals(FILE_LAPS_AMOUNT_OF_LAPS, parser.getTrack().getLaps().size());
-		assertEquals(FILE_LAPS_AMOUNT_OF_TRACKPOINTS, parser.getAmountOfPoints());
-		assertEquals(FILE_LAPS_DURATION_IN_SECS, parser.getTrack().getTotalTimeSeconds(), DELTA_ACCEPTED);
-		assertEquals(FILE_LAPS_DISTANCE_IN_METERS, parser.getTrack().getDistanceMeters(), DELTA_ACCEPTED);
+		assertEquals(FILE_LAPS_TIMESTAMP.getTime(), track.getStartTimestamp());
+		assertEquals(FILE_LAPS_AMOUNT_OF_LAPS, track.getLaps().size());
+		assertEquals(FILE_LAPS_AMOUNT_OF_TRACKPOINTS, track.getTrackpoints().size());
+		assertEquals(FILE_LAPS_DURATION_IN_SECS, track.getRunDurationInSeconds(), DELTA_ACCEPTED);
+		assertEquals(FILE_LAPS_DISTANCE_IN_METERS, track.getRunDistanceInMeters(), DELTA_ACCEPTED);
 	}
 
 }

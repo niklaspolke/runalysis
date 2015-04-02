@@ -1,8 +1,4 @@
-package vu.de.npolke.runalysis.gui.cells;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
+package vu.de.npolke.runalysis.calculation;
 
 /**
  * Copyright (C) 2015 Niklas Polke<br/>
@@ -15,20 +11,22 @@ import java.util.TimeZone;
  *
  * @author Niklas Polke
  */
-public class TimestampCell {
+public class CalculationLap {
 
-	private final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	private final long runDurationInSeconds;
 
-	private final Date timestamp;
+	private final double runDistanceInMeters;
 
-	public TimestampCell(final long timestamp) {
-		this.timestamp = new Date(timestamp);
-
-		TIMESTAMP_FORMAT.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
+	public CalculationLap(final long runDurationInSeconds, final double runDistanceInMeters) {
+		this.runDurationInSeconds = runDurationInSeconds;
+		this.runDistanceInMeters = runDistanceInMeters;
 	}
 
-	@Override
-	public String toString() {
-		return TIMESTAMP_FORMAT.format(timestamp);
+	public long getRunDurationInSeconds() {
+		return runDurationInSeconds;
+	}
+
+	public double getRunDistanceInMeters() {
+		return runDistanceInMeters;
 	}
 }

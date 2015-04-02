@@ -18,11 +18,11 @@ import org.junit.Test;
 public class DurationCellTest {
 
 	// 1:15 min
-	private static final double TIME1_SECONDS = 1 * 60 + 15;
+	private static final long TIME1_SECONDS = 1 * 60 + 15;
 	// 12:30 min
-	private static final double TIME2_SECONDS = 12 * 60 + 30;
+	private static final long TIME2_SECONDS = 12 * 60 + 30;
 	// 1:30:45 h
-	private static final double TIME3_SECONDS = 1 * 60 * 60 + 30 * 60 + 45;
+	private static final long TIME3_SECONDS = 1 * 60 * 60 + 30 * 60 + 45;
 
 	@Test
 	public void testShortMinTime() {

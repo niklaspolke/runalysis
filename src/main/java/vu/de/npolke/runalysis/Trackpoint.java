@@ -1,9 +1,5 @@
 package vu.de.npolke.runalysis;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
-
 /**
  * Copyright (C) 2015 Niklas Polke<br/>
  * <br/>
@@ -17,50 +13,20 @@ import java.util.TimeZone;
  */
 public class Trackpoint {
 
-	// NOT thread-safe
-	private static SimpleDateFormat TIME_FORMAT;
+	private final long timestampMillis;
 
-	static {
-		TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
-		TIME_FORMAT.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
+	private final double recordedDistanceMeters;
+
+	public Trackpoint(final long timestampMillis, final double recordedDistanceMeters) {
+		this.timestampMillis = timestampMillis;
+		this.recordedDistanceMeters = recordedDistanceMeters;
 	}
 
-	private Date time;
-
-	private double distanceMeters;
-
-	private BreakMarker breakMarker;
-
-	public Trackpoint() {
+	public long getTimestampMillis() {
+		return timestampMillis;
 	}
 
-	public Date getTime() {
-		return time;
-	}
-
-	public void setTime(final Date time) {
-		this.time = time;
-	}
-
-	public double getDistanceMeters() {
-		return distanceMeters;
-	}
-
-	public void setDistanceMeters(final double distanceMeters) {
-		this.distanceMeters = distanceMeters;
-	}
-
-	public BreakMarker getBreakMarker() {
-		return breakMarker;
-	}
-
-	public void setBreakMarker(final BreakMarker breakMarker) {
-		this.breakMarker = breakMarker;
-	}
-
-	@Override
-	public String toString() {
-		return Trackpoint.class.getSimpleName() + ": (" + TIME_FORMAT.format(time) + "): " + String.format("%5.0f", getDistanceMeters())
-				+ " m";
+	public double getRecordedDistanceMeters() {
+		return recordedDistanceMeters;
 	}
 }

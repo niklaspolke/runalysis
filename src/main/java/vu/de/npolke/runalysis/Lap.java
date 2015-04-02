@@ -1,10 +1,7 @@
 package vu.de.npolke.runalysis;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.TimeZone;
 
 /**
  * Copyright (C) 2015 Niklas Polke<br/>
@@ -19,71 +16,46 @@ import java.util.TimeZone;
  */
 public class Lap {
 
-	// NOT thread-safe
-	private static SimpleDateFormat TIME_FORMAT;
+	private final long startTimestampMillis;
 
-	static {
-		TIME_FORMAT = new SimpleDateFormat("HH:mm:ss");
-		TIME_FORMAT.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
+	private final double recordedTotalTimeSeconds;
+
+	private final double recordedDistanceMeters;
+
+	private final LapIntensity intensity;
+
+	private final List<Trackpoint> points;
+
+	public Lap(final long startTimestampMillis, final double recordedTotalTimeSeconds, final double recordedDistanceMeters,
+			final LapIntensity intensity, final List<Trackpoint> points) {
+		this.startTimestampMillis = startTimestampMillis;
+		this.recordedTotalTimeSeconds = recordedTotalTimeSeconds;
+		this.recordedDistanceMeters = recordedDistanceMeters;
+		this.intensity = intensity;
+		if (points != null) {
+			this.points = new LinkedList<Trackpoint>(points);
+		} else {
+			this.points = new LinkedList<Trackpoint>();
+		}
 	}
 
-	private Date startTime;
-
-	private double totalTimeSeconds;
-
-	private double distanceMeters;
-
-	private LapIntensity intensity;
-
-	private List<Trackpoint> points;
-
-	public Lap() {
-		points = new LinkedList<Trackpoint>();
+	public long getStartTimestampMillis() {
+		return startTimestampMillis;
 	}
 
-	public Date getStartTime() {
-		return startTime;
+	public double getRecordedTotalTimeSeconds() {
+		return recordedTotalTimeSeconds;
 	}
 
-	public void setStartTime(final Date startTime) {
-		this.startTime = startTime;
-	}
-
-	public double getTotalTimeSeconds() {
-		return totalTimeSeconds;
-	}
-
-	public void setTotalTimeSeconds(final double totalTimeSeconds) {
-		this.totalTimeSeconds = totalTimeSeconds;
-	}
-
-	public double getDistanceMeters() {
-		return distanceMeters;
-	}
-
-	public void setDistanceMeters(final double distanceMeters) {
-		this.distanceMeters = distanceMeters;
+	public double getRecordedDistanceMeters() {
+		return recordedDistanceMeters;
 	}
 
 	public LapIntensity getIntensity() {
 		return intensity;
 	}
 
-	public void setIntensity(final LapIntensity intensity) {
-		this.intensity = intensity;
-	}
-
 	public List<Trackpoint> getPoints() {
-		return points;
-	}
-
-	public void addPoint(final Trackpoint newPoint) {
-		points.add(newPoint);
-	}
-
-	@Override
-	public String toString() {
-		return Lap.class.getSimpleName() + " (" + TIME_FORMAT.format(getStartTime()) + ", " + getIntensity() + "): "
-				+ String.format("%5.0f", getTotalTimeSeconds()) + " secs " + String.format("%5.0f", getDistanceMeters()) + " m";
+		return new LinkedList<Trackpoint>(points);
 	}
 }

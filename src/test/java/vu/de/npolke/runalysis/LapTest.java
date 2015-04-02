@@ -2,7 +2,7 @@ package vu.de.npolke.runalysis;
 
 import static org.junit.Assert.*;
 
-import java.util.Date;
+import java.util.LinkedList;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,85 +23,79 @@ public class LapTest {
 	private static final double DELTA_ACCEPTED = 0.001;
 
 	// 2015-03-24 0:17:49 GMT
-	private static final Date TEST1_STARTTIME = new Date(1427152669472l);
+	private static final long TEST1_STARTTIMESTAMPMILLIS = 1427152669472l;
 	private static final double TEST1_TOTALTIMESECONDS = 123.4;
 	private static final double TEST1_DISTANCEMETERS = 34.5;
 	private static final LapIntensity TEST1_INTENSITY = LapIntensity.ACTIVE;
-	private static final String TEST1_STRING = "Lap (00:17:49, ACTIVE):   123 secs    35 m";
 
 	// 1min * 60sec/min * 1000ms/sec = 60000ms
 	// 1h * 60min/h * 60sec/min * 1000ms/sec = 3600000ms
-	private static final Date TEST2_STARTTIME = new Date(1427152669472l + 60000 + 3600000);
+	private static final long TEST2_STARTTIMESTAMPMILLIS = 1427152669472l + 60000l + 3600000l;
 	private static final double TEST2_TOTALTIMESECONDS = 1654.4;
 	private static final double TEST2_DISTANCEMETERS = 8888.5;
 	private static final LapIntensity TEST2_INTENSITY = LapIntensity.RESTING;
-	private static final String TEST2_STRING = "Lap (01:18:49, RESTING):  1654 secs  8889 m";
+	private static final Trackpoint TEST2_POINT1 = new Trackpoint(123, 5);
+	private static final Trackpoint TEST2_POINT2 = new Trackpoint(133, 10);
 
-	private Lap testLap;
+	private static final Trackpoint POINT3 = new Trackpoint(155, 15);
+
+	private Lap testLap1;
+	private Lap testLap2;
 
 	@Before
 	public void setup() {
-		testLap = new Lap();
-		testLap.setStartTime(TEST1_STARTTIME);
-		testLap.setTotalTimeSeconds(TEST1_TOTALTIMESECONDS);
-		testLap.setDistanceMeters(TEST1_DISTANCEMETERS);
-		testLap.setIntensity(TEST1_INTENSITY);
+		testLap1 = new Lap(TEST1_STARTTIMESTAMPMILLIS, TEST1_TOTALTIMESECONDS, TEST1_DISTANCEMETERS, TEST1_INTENSITY, null);
+		LinkedList<Trackpoint> points = new LinkedList<Trackpoint>();
+		points.add(TEST2_POINT1);
+		points.add(TEST2_POINT2);
+		testLap2 = new Lap(TEST2_STARTTIMESTAMPMILLIS, TEST2_TOTALTIMESECONDS, TEST2_DISTANCEMETERS, TEST2_INTENSITY, points);
 	}
 
 	@Test
 	public void startTime() {
-		assertEquals(TEST1_STARTTIME, testLap.getStartTime());
+		assertEquals(TEST1_STARTTIMESTAMPMILLIS, testLap1.getStartTimestampMillis());
 
-		testLap.setStartTime(TEST2_STARTTIME);
-		assertEquals(TEST2_STARTTIME, testLap.getStartTime());
+		assertEquals(TEST2_STARTTIMESTAMPMILLIS, testLap2.getStartTimestampMillis());
 	}
 
 	@Test
-	public void totalTimeSeconds() {
-		assertEquals(TEST1_TOTALTIMESECONDS, testLap.getTotalTimeSeconds(), DELTA_ACCEPTED);
+	public void recordedTotalTimeSeconds() {
+		assertEquals(TEST1_TOTALTIMESECONDS, testLap1.getRecordedTotalTimeSeconds(), DELTA_ACCEPTED);
 
-		testLap.setTotalTimeSeconds(TEST2_TOTALTIMESECONDS);
-		assertEquals(TEST2_TOTALTIMESECONDS, testLap.getTotalTimeSeconds(), DELTA_ACCEPTED);
+		assertEquals(TEST2_TOTALTIMESECONDS, testLap2.getRecordedTotalTimeSeconds(), DELTA_ACCEPTED);
 	}
 
 	@Test
-	public void distanceMeters() {
-		assertEquals(TEST1_DISTANCEMETERS, testLap.getDistanceMeters(), DELTA_ACCEPTED);
+	public void recordedDistanceMeters() {
+		assertEquals(TEST1_DISTANCEMETERS, testLap1.getRecordedDistanceMeters(), DELTA_ACCEPTED);
 
-		testLap.setDistanceMeters(TEST2_DISTANCEMETERS);
-		assertEquals(TEST2_DISTANCEMETERS, testLap.getDistanceMeters(), DELTA_ACCEPTED);
+		assertEquals(TEST2_DISTANCEMETERS, testLap2.getRecordedDistanceMeters(), DELTA_ACCEPTED);
 	}
 
 	@Test
 	public void intensity() {
-		assertEquals(TEST1_INTENSITY, testLap.getIntensity());
+		assertEquals(TEST1_INTENSITY, testLap1.getIntensity());
 
-		testLap.setIntensity(TEST2_INTENSITY);
-		assertEquals(TEST2_INTENSITY, testLap.getIntensity());
+		assertEquals(TEST2_INTENSITY, testLap2.getIntensity());
 	}
 
 	@Test
 	public void points() {
-		assertTrue(testLap.getPoints().isEmpty());
+		assertTrue(testLap1.getPoints().isEmpty());
 
-		Trackpoint point1 = new Trackpoint();
-		Trackpoint point2 = new Trackpoint();
-		testLap.addPoint(point1);
-		testLap.addPoint(point2);
+		assertEquals(2, testLap2.getPoints().size());
+		assertTrue(testLap2.getPoints().contains(TEST2_POINT1));
+		assertTrue(testLap2.getPoints().contains(TEST2_POINT2));
+		assertFalse(testLap2.getPoints().contains(POINT3));
 
-		assertEquals(2, testLap.getPoints().size());
-		assertEquals(point1, testLap.getPoints().get(0));
-		assertEquals(point2, testLap.getPoints().get(1));
-	}
+		testLap1.getPoints().add(POINT3);
+		testLap2.getPoints().add(POINT3);
 
-	@Test
-	public void string() {
-		assertEquals(TEST1_STRING, testLap.toString());
+		assertTrue(testLap1.getPoints().isEmpty());
 
-		testLap.setStartTime(TEST2_STARTTIME);
-		testLap.setTotalTimeSeconds(TEST2_TOTALTIMESECONDS);
-		testLap.setDistanceMeters(TEST2_DISTANCEMETERS);
-		testLap.setIntensity(TEST2_INTENSITY);
-		assertEquals(TEST2_STRING, testLap.toString());
+		assertEquals(2, testLap2.getPoints().size());
+		assertTrue(testLap2.getPoints().contains(TEST2_POINT1));
+		assertTrue(testLap2.getPoints().contains(TEST2_POINT2));
+		assertFalse(testLap2.getPoints().contains(POINT3));
 	}
 }

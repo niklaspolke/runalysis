@@ -1,8 +1,12 @@
 package vu.de.npolke.runalysis.states;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.xml.stream.XMLStreamReader;
 
 import vu.de.npolke.runalysis.Lap;
+import vu.de.npolke.runalysis.LapIntensity;
 import vu.de.npolke.runalysis.TcxParser;
 import vu.de.npolke.runalysis.Trackpoint;
 
@@ -21,28 +25,54 @@ public class ParserStateLap implements ParserState {
 
 	private final TcxParser parser;
 
-	private final ParserState parent;
+	private final ParserStateDefault parent;
 	private final ParserStateLapDistance stateLapDistance;
 	private final ParserStateLapDuration stateLapDuration;
 	private final ParserStateLapIntensity stateLapIntensity;
 	private final ParserStatePoint statePoint;
 
-	private Lap lap;
+	private long startTimestampMillis;
+	private double recordedTotalTimeSeconds;
+	private double recordedDistanceMeters;
+	private LapIntensity intensity;
+	private List<Trackpoint> points;
 
-	public ParserStateLap(final TcxParser parser, final ParserState parent) {
+	public ParserStateLap(final TcxParser parser, final ParserStateDefault parent) {
 		this.parser = parser;
 		this.parent = parent;
 		stateLapDistance = new ParserStateLapDistance(parser, this);
 		stateLapDuration = new ParserStateLapDuration(parser, this);
 		stateLapIntensity = new ParserStateLapIntensity(parser, this);
 		statePoint = new ParserStatePoint(parser, this);
+		points = new ArrayList<Trackpoint>();
 	}
 
-	public void setLap(final Lap lap) {
-		this.lap = lap;
-		stateLapDistance.setLap(lap);
-		stateLapDuration.setLap(lap);
-		stateLapIntensity.setLap(lap);
+	public void addTrackpoint(final Trackpoint newPoint) {
+		points.add(newPoint);
+	}
+
+	private void reset() {
+		startTimestampMillis = 0;
+		recordedTotalTimeSeconds = 0;
+		recordedDistanceMeters = 0;
+		intensity = null;
+		points.clear();
+	}
+
+	public void setStartTimestampMillis(final long startTimestampMillis) {
+		this.startTimestampMillis = startTimestampMillis;
+	}
+
+	public void setRecordedTotalTimeSeconds(final double recordedTotalTimeSeconds) {
+		this.recordedTotalTimeSeconds = recordedTotalTimeSeconds;
+	}
+
+	public void setRecordedDistanceMeters(final double recordedDistanceMeters) {
+		this.recordedDistanceMeters = recordedDistanceMeters;
+	}
+
+	public void setIntensity(final LapIntensity intensity) {
+		this.intensity = intensity;
 	}
 
 	@Override
@@ -55,9 +85,6 @@ public class ParserStateLap implements ParserState {
 		} else if (TcxParser.ELEMENT_LAP_INTENSITY.equalsIgnoreCase(startElement)) {
 			parser.changeState(stateLapIntensity);
 		} else if (TcxParser.ELEMENT_POINT.equalsIgnoreCase(startElement)) {
-			Trackpoint point = new Trackpoint();
-			lap.addPoint(point);
-			statePoint.setPoint(point);
 			parser.changeState(statePoint);
 		}
 	}
@@ -66,7 +93,9 @@ public class ParserStateLap implements ParserState {
 	public void handleEndElement(final XMLStreamReader xmlReader) {
 		String endElement = xmlReader.getLocalName();
 		if (TcxParser.ELEMENT_LAP.equalsIgnoreCase(endElement)) {
-			parser.getTrack().addLap(lap);
+			Lap lap = new Lap(startTimestampMillis, recordedTotalTimeSeconds, recordedDistanceMeters, intensity, points);
+			reset();
+			parent.addLap(lap);
 			parser.changeState(parent);
 		}
 	}
