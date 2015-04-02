@@ -29,16 +29,4 @@ public class Trackpoint {
 	public double getRecordedDistanceMeters() {
 		return recordedDistanceMeters;
 	}
-
-	// TODO: Refactoring: remove breakMarker
-
-	private BreakMarker breakMarker;
-
-	public BreakMarker getBreakMarker() {
-		return breakMarker;
-	}
-
-	public void setBreakMarker(BreakMarker breakMarker) {
-		this.breakMarker = breakMarker;
-	}
 }

@@ -1,7 +1,6 @@
 package vu.de.npolke.runalysis;
 
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,86 +21,89 @@ import vu.de.npolke.runalysis.calculation.CalculationTrackpointDecorator;
  */
 public class BreakCorrectionLogic {
 
-	private static int lastIndexOfList(List<?> list) {
-		return list.size() - 1;
+	private static boolean isStartOfBreak(final CalculationTrackpointDecorator trackpoint, final Deque<Lap> breakLapsStack) {
+		boolean isStartOfBreak = false;
+		if (breakLapsStack.isEmpty() == false) {
+			isStartOfBreak = trackpoint.getTimestampMillis() > breakLapsStack.peek().getStartTime().getTime();
+		}
+		return isStartOfBreak;
 	}
 
-	private static int findRunningLapWithBreak(final List<Lap> runningLaps, final Date timestampOfBreak) {
-		// search for first lap from behind that starts before the break
-		int indexOfLap = lastIndexOfList(runningLaps);
-		while (runningLaps.get(indexOfLap).getStartTime().after(timestampOfBreak)) {
-			indexOfLap--;
-		}
-		return indexOfLap;
+	private static void addBreak(final BreakDifference currentBreakDifference, final CalculationTrackpointDecorator startOfBreak,
+			final Trackpoint endOfBreak) {
+		currentBreakDifference.distanceInMeters += endOfBreak.getRecordedDistanceMeters() - startOfBreak.getRecordedDistanceMeters();
+		currentBreakDifference.durationInMilliseconds += endOfBreak.getTimestampMillis() - startOfBreak.getTimestampMillis();
 	}
 
-	private static void correctLaps(final List<Lap> runningLaps, final int indexOfLapWithBreak, final Date breakStartTime,
-			final double breakDuration) {
-		// 1. correct Lap with break
-		Lap lapWithBreak = runningLaps.get(indexOfLapWithBreak);
-		List<Trackpoint> pointsOfLapWithBreak = lapWithBreak.getPoints();
+	private static CalculationTrackpointDecorator calcTrackpoint(final Trackpoint originalPoint, final Trackpoint startPoint,
+			final BreakDifference breakDiff) {
+		// decorate
+		CalculationTrackpointDecorator newTrackpoint = new CalculationTrackpointDecorator(originalPoint);
+		// calculate
+		newTrackpoint.setRunDurationInMilliseconds(originalPoint.getTimestampMillis() - startPoint.getTimestampMillis()
+				- breakDiff.durationInMilliseconds);
+		newTrackpoint.setRunDistanceInMeters(originalPoint.getRecordedDistanceMeters() - breakDiff.distanceInMeters);
+		return newTrackpoint;
+	}
 
-		// break starts one trackpoint after the break's start time
-		int pointIndex = 0;
-		while (pointsOfLapWithBreak.get(pointIndex).getTimestampMillis() <= breakStartTime.getTime()) {
-			pointIndex++;
+	private static CalculationLap calcLap(final CalculationTrackpointDecorator currentPoint,
+			final CalculationTrackpointDecorator endPointOfLastLap) {
+		long durationInMillis = currentPoint.getRunDurationInMilliseconds();
+		double distanceInMeters = currentPoint.getRunDistanceInMeters();
+		if (endPointOfLastLap != null) {
+			durationInMillis -= endPointOfLastLap.getRunDurationInMilliseconds();
+			distanceInMeters -= endPointOfLastLap.getRunDistanceInMeters();
 		}
-		Trackpoint breakStartPoint = pointsOfLapWithBreak.get(pointIndex);
-		// break ends three trackpoints later, no matter of the break duration - TomTom magic?
-		Trackpoint breakEndPoint = pointsOfLapWithBreak.get(pointIndex + 3);
-
-		// 1a set BreakMarkers before and after break
-		breakStartPoint.setBreakMarker(BreakMarker.LAST_POINT_BEFORE_BREAK);
-		breakEndPoint.setBreakMarker(BreakMarker.FIRST_POINT_AFTER_BREAK);
-
-		// 1b remove Trackpoints within break
-		pointsOfLapWithBreak.remove(pointIndex + 2);
-		pointsOfLapWithBreak.remove(pointIndex + 1);
-
-		// calculate distance gone within break
-		double distanceDuringBreak = breakEndPoint.getRecordedDistanceMeters() - breakStartPoint.getRecordedDistanceMeters();
-
-		// 1c correct Lap's distance and duration
-		lapWithBreak.setTotalTimeSeconds(lapWithBreak.getTotalTimeSeconds() - breakDuration);
-		lapWithBreak.setDistanceMeters(lapWithBreak.getDistanceMeters() - distanceDuringBreak);
+		return new CalculationLap(durationInMillis / 1000, distanceInMeters);
 	}
 
 	public static CalculationTrack removeBreaksFromTrack(final Track track) {
-		List<Lap> runningLaps = new ArrayList<Lap>();
-		List<Lap> breakLaps = new LinkedList<Lap>();
-
-		// divide laps into running and break laps
+		// search for break laps
+		List<Lap> runningLapList = new LinkedList<Lap>();
+		Deque<Lap> breakLapStack = new LinkedList<Lap>();
 		for (Lap lap : track.getLaps()) {
 			if (LapIntensity.RESTING.equals(lap.getIntensity())) {
-				breakLaps.add(lap);
+				breakLapStack.addLast(lap);
 			} else {
-				runningLaps.add(lap);
+				runningLapList.add(lap);
 			}
-		}
-
-		// remove restingLaps
-		for (Lap breaklap : breakLaps) {
-			track.getLaps().remove(breaklap);
-		}
-
-		// correct time and distance in running laps with break(s)
-		for (Lap breakLap : breakLaps) {
-			// find lap with break
-			int indexRunningLapWithBreak = findRunningLapWithBreak(runningLaps, breakLap.getStartTime());
-
-			// correct time and distance
-			correctLaps(runningLaps, indexRunningLapWithBreak, breakLap.getStartTime(), breakLap.getTotalTimeSeconds());
 		}
 
 		CalculationTrack calcTrack = new CalculationTrack();
+		final Trackpoint trackStartPoint = runningLapList.get(0).getPoints().get(0);
+		Deque<Trackpoint> pointOfLapStack;
+		CalculationTrackpointDecorator endPointOfLastLap = null;
+		CalculationTrackpointDecorator currentPoint = null;
+		final BreakDifference currentBreakDifference = new BreakDifference();
 
-		for (Lap lap : track.getLaps()) {
-			calcTrack.getLaps().add(new CalculationLap((long) lap.getTotalTimeSeconds(), lap.getDistanceMeters()));
-			for (Trackpoint point : lap.getPoints()) {
-				calcTrack.getTrackpoints().add(new CalculationTrackpointDecorator(point));
+		for (Lap lap : runningLapList) {
+			pointOfLapStack = new LinkedList<Trackpoint>(lap.getPoints());
+			while (pointOfLapStack.isEmpty() == false) {
+				currentPoint = calcTrackpoint(pointOfLapStack.pop(), trackStartPoint, currentBreakDifference);
+				calcTrack.getTrackpoints().add(currentPoint);
+				if (isStartOfBreak(currentPoint, breakLapStack)) {
+					breakLapStack.pop(); // no need for further details of breakLap
+					currentPoint.setBreakMarker(BreakMarker.LAST_POINT_BEFORE_BREAK);
+					// start: TomTom TCX-FILE MAGIC
+					pointOfLapStack.pop();
+					pointOfLapStack.pop();
+					addBreak(currentBreakDifference, currentPoint, pointOfLapStack.peek());
+					// end: TomTom TCX-FILE MAGIC
+					currentPoint = calcTrackpoint(pointOfLapStack.pop(), trackStartPoint, currentBreakDifference);
+					currentPoint.setBreakMarker(BreakMarker.FIRST_POINT_AFTER_BREAK);
+					calcTrack.getTrackpoints().add(currentPoint);
+				}
 			}
+
+			calcTrack.getLaps().add(calcLap(currentPoint, endPointOfLastLap));
+			endPointOfLastLap = currentPoint;
 		}
 
 		return calcTrack;
+	}
+
+	static class BreakDifference {
+		long durationInMilliseconds;
+		double distanceInMeters;
 	}
 }
