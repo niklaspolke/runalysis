@@ -12,7 +12,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
 
-import vu.de.npolke.runalysis.BreakCorrectionLogic;
 import vu.de.npolke.runalysis.PaceCalculator;
 import vu.de.npolke.runalysis.TcxParser;
 import vu.de.npolke.runalysis.calculation.CalculationLap;
@@ -139,7 +138,7 @@ public class MainFrame extends JFrame {
 		} else {
 			TcxParser parser = new TcxParser(args[0]);
 			parser.readFile();
-			CalculationTrack track = BreakCorrectionLogic.removeBreaksFromTrack(parser.getTrack());
+			CalculationTrack track = parser.getTrack();
 			MainFrame frame = new MainFrame(track);
 			frame.setVisible(true);
 		}

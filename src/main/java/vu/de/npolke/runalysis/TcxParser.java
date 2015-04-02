@@ -78,8 +78,8 @@ public class TcxParser {
 		state = newState;
 	}
 
-	public Track getTrack() {
-		return track;
+	public CalculationTrack getTrack() {
+		return BreakCorrectionLogic.removeBreaksFromTrack(track);
 	}
 
 	public void setTrack(final Track track) {
@@ -179,15 +179,7 @@ public class TcxParser {
 			parser.readFile();
 			System.out.println("Reading file \"" + args[0] + "\" ... done.");
 			System.out.println();
-			System.out.println("track duration: " + formatAsDuration(parser.getTrack().getTotalTimeSeconds()) + " h");
-			System.out.println("track distance: " + String.format("%7.0f", parser.getTrack().getDistanceMeters()) + " m");
-			System.out.println("        # laps: " + String.format("%7d", parser.getTrack().getLaps().size()));
-			System.out.println(" # trackpoints: " + String.format("%7d", parser.getAmountOfPoints()));
-			System.out.println();
-			System.out.println("Correcting breaks...");
-			CalculationTrack track = BreakCorrectionLogic.removeBreaksFromTrack(parser.getTrack());
-			System.out.println("Correcting breaks... done.");
-			System.out.println();
+			CalculationTrack track = parser.getTrack();
 			System.out.println("track duration: " + formatAsDuration(track.getRunDurationInSeconds()) + " h");
 			System.out.println("track distance: " + String.format("%7.0f", track.getRunDistanceInMeters()) + " m");
 			System.out.println("        # laps: " + String.format("%7d", track.getLaps().size()));

@@ -57,7 +57,7 @@ public class TcxParserTest {
 		TcxParser parser = new TcxParser(FILE_NORMAL, getClass().getResourceAsStream(FILE_NORMAL));
 
 		parser.readFile();
-		CalculationTrack track = BreakCorrectionLogic.removeBreaksFromTrack(parser.getTrack());
+		CalculationTrack track = parser.getTrack();
 
 		assertEquals(FILE_NORMAL_TIMESTAMP.getTime(), track.getStartTimestamp());
 		assertEquals(FILE_NORMAL_AMOUNT_OF_LAPS, track.getLaps().size());
@@ -71,7 +71,7 @@ public class TcxParserTest {
 		TcxParser parser = new TcxParser(FILE_LAPS, getClass().getResourceAsStream(FILE_LAPS));
 
 		parser.readFile();
-		CalculationTrack track = BreakCorrectionLogic.removeBreaksFromTrack(parser.getTrack());
+		CalculationTrack track = parser.getTrack();
 
 		assertEquals(FILE_LAPS_TIMESTAMP.getTime(), track.getStartTimestamp());
 		assertEquals(FILE_LAPS_AMOUNT_OF_LAPS, track.getLaps().size());
