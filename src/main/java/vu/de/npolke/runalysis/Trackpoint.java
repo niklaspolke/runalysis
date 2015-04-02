@@ -13,8 +13,14 @@ package vu.de.npolke.runalysis;
  */
 public class Trackpoint {
 
+	/**
+	 * <Time>
+	 */
 	private final long timestampMillis;
 
+	/**
+	 * <DistanceMeters>
+	 */
 	private final double recordedDistanceMeters;
 
 	public Trackpoint(final long timestampMillis, final double recordedDistanceMeters) {

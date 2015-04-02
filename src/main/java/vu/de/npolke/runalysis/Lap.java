@@ -16,12 +16,24 @@ import java.util.List;
  */
 public class Lap {
 
+	/**
+	 * <StartTime>
+	 */
 	private final long startTimestampMillis;
 
+	/**
+	 * <TotalTimeSeconds>
+	 */
 	private final double recordedTotalTimeSeconds;
 
+	/**
+	 * <DistanceMeters>
+	 */
 	private final double recordedDistanceMeters;
 
+	/**
+	 * <Intensity>
+	 */
 	private final LapIntensity intensity;
 
 	private final List<Trackpoint> points;
