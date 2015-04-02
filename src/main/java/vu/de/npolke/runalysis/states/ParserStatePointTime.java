@@ -41,6 +41,6 @@ public class ParserStatePointTime implements ParserState {
 	@Override
 	public void handleCharacters(final XMLStreamReader xmlReader) {
 		String text = xmlReader.getText();
-		parentStatePoint.setTimestampMillis(parser.extractTimestamp(text).getTime());
+		parentStatePoint.setTimestampMillis(parser.extractTimestampMillis(text));
 	}
 }

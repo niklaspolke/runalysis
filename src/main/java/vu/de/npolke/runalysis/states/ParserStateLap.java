@@ -25,7 +25,7 @@ public class ParserStateLap implements ParserState {
 
 	private final TcxParser parser;
 
-	private final ParserState parent;
+	private final ParserStateDefault parent;
 	private final ParserStateLapDistance stateLapDistance;
 	private final ParserStateLapDuration stateLapDuration;
 	private final ParserStateLapIntensity stateLapIntensity;
@@ -37,7 +37,7 @@ public class ParserStateLap implements ParserState {
 	private LapIntensity intensity;
 	private List<Trackpoint> points;
 
-	public ParserStateLap(final TcxParser parser, final ParserState parent) {
+	public ParserStateLap(final TcxParser parser, final ParserStateDefault parent) {
 		this.parser = parser;
 		this.parent = parent;
 		stateLapDistance = new ParserStateLapDistance(parser, this);
@@ -95,7 +95,7 @@ public class ParserStateLap implements ParserState {
 		if (TcxParser.ELEMENT_LAP.equalsIgnoreCase(endElement)) {
 			Lap lap = new Lap(startTimestampMillis, recordedTotalTimeSeconds, recordedDistanceMeters, intensity, points);
 			reset();
-			parser.getTrack().addLap(lap);
+			parent.addLap(lap);
 			parser.changeState(parent);
 		}
 	}

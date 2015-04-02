@@ -37,6 +37,7 @@ public class TcxParser {
 
 	public static final String FILE_ENDING_ZIP = ".ZIP";
 
+	public static final String ELEMENT_ACTIVITY = "Activity";
 	public static final String ELEMENT_ID = "Id";
 	public static final String ELEMENT_LAP = "Lap";
 	public static final String ELEMENT_LAP_PROPERTY_STARTTIME = "StartTime";
@@ -62,7 +63,6 @@ public class TcxParser {
 
 	public TcxParser(final String filename) {
 		this.filename = filename;
-		track = new Track();
 	}
 
 	public TcxParser(final String filename, final InputStream inputStream) {
@@ -80,6 +80,10 @@ public class TcxParser {
 
 	public Track getTrack() {
 		return track;
+	}
+
+	public void setTrack(final Track track) {
+		this.track = track;
 	}
 
 	public int getAmountOfPoints() {
@@ -143,8 +147,7 @@ public class TcxParser {
 		}
 	}
 
-	// TODO: correct to timestampMilliseconds/long ?
-	public Date extractTimestamp(final String timestampText) {
+	public long extractTimestampMillis(final String timestampText) {
 		Date timestamp = null;
 		try {
 			timestamp = TIMESTAMP_FORMATTER.parse(timestampText);
@@ -156,7 +159,7 @@ public class TcxParser {
 			} catch (ParseException e) {
 			}
 		}
-		return timestamp;
+		return timestamp.getTime();
 	}
 
 	public static String formatAsDuration(final double secondsAsDouble) {

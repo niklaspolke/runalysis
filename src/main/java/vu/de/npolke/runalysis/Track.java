@@ -1,11 +1,7 @@
 package vu.de.npolke.runalysis;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 
 /**
  * Copyright (C) 2015 Niklas Polke<br/>
@@ -20,36 +16,26 @@ import java.util.TimeZone;
  */
 public class Track {
 
-	// NOT thread-safe
-	private static SimpleDateFormat TIME_FORMAT;
-	private static SimpleDateFormat DURATION_FORMAT;
+	private final long startTimestampMillis;
 
-	static {
-		TIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-		TIME_FORMAT.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
-		DURATION_FORMAT = new SimpleDateFormat("H:mm:ss");
-		DURATION_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+	private final List<Lap> laps;
+
+	public Track(final long startTimestampMillis, final List<Lap> laps) {
+		this.startTimestampMillis = startTimestampMillis;
+		this.laps = new LinkedList<Lap>(laps);
 	}
 
-	private Date startTime;
-
-	private List<Lap> laps;
-
-	public Track() {
-		laps = new ArrayList<Lap>();
+	public long getStartTimestampMillis() {
+		return startTimestampMillis;
 	}
 
-	public Date getStartTime() {
-		return startTime;
-	}
-
-	public void setStartTime(final Date startTime) {
-		this.startTime = startTime;
+	public List<Lap> getLaps() {
+		return new LinkedList<Lap>(laps);
 	}
 
 	public double getTotalTimeSeconds() {
 		double durationInSeconds = 0;
-		for (Lap lap : getLaps()) {
+		for (Lap lap : laps) {
 			durationInSeconds += lap.getRecordedTotalTimeSeconds();
 		}
 		return durationInSeconds;
@@ -57,24 +43,9 @@ public class Track {
 
 	public double getDistanceMeters() {
 		double distanceInMeters = 0;
-		for (Lap lap : getLaps()) {
+		for (Lap lap : laps) {
 			distanceInMeters += lap.getRecordedDistanceMeters();
 		}
 		return distanceInMeters;
-	}
-
-	public List<Lap> getLaps() {
-		return laps;
-	}
-
-	public void addLap(final Lap lap) {
-		laps.add(lap);
-	}
-
-	@Override
-	public String toString() {
-		return Track.class.getSimpleName() + " (" + TIME_FORMAT.format(getStartTime()) + "): "
-				+ DURATION_FORMAT.format(new Date((long) (getTotalTimeSeconds() * 1000))) + " h - "
-				+ String.format(Locale.ENGLISH, "%5.3f", getDistanceMeters() / 1000) + " km - " + getLaps().size() + " lap(s)";
 	}
 }
