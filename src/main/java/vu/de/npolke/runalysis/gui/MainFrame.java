@@ -3,8 +3,11 @@ package vu.de.npolke.runalysis.gui;
 import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.List;
 
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -12,6 +15,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
 
+import vu.de.npolke.runalysis.LapCreationLogic;
 import vu.de.npolke.runalysis.PaceCalculator;
 import vu.de.npolke.runalysis.TcxParser;
 import vu.de.npolke.runalysis.calculation.CalculationLap;
@@ -37,7 +41,7 @@ import com.xeiam.xchart.XChartPanel;
  * @author Niklas Polke
  */
 @SuppressWarnings("serial")
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame implements ActionListener {
 
 	private static final String WINDOW_TITLE = "Runalysis by Niklas Polke";
 	private static final int WINDOW_WIDTH = 1200;
@@ -51,9 +55,18 @@ public class MainFrame extends JFrame {
 	private static final String[] TABLE_TRACK_COLUMN_NAMES = { "Start", "Distance", "Duration", "Pace" };
 	private static final String[] TABLE_LAPS_COLUMN_NAMES = { "Runde", "Distance", "Duration", "Pace" };
 
+	private static final String BUTTON_EDITLAPS_TEXT = "Edit Lap Borders";
+
 	private JTable trackTable;
 	private JTable lapsTable;
 	private GridBagLayout gridBagLayout;
+
+	private JButton buttonEditLapBorders;
+	private EditLapBordersDialog dialogEditLapBorders;
+
+	JScrollPane pane;
+
+	private CalculationTrack track;
 
 	public MainFrame(final CalculationTrack track) {
 		super(WINDOW_TITLE);
@@ -61,9 +74,12 @@ public class MainFrame extends JFrame {
 		gridBagLayout = new GridBagLayout();
 		getContentPane().setLayout(gridBagLayout);
 
+		this.track = track;
 		setTrack(track);
 		setLaps(track.getLaps());
 		setPaces(PaceCalculator.calculatePace(track, 30));
+		editLapBorders();
+		dialogEditLapBorders = new EditLapBordersDialog(this);
 
 		setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 		setLocation(WINDOW_LOCATION_X, WINDOW_LOCATION_Y);
@@ -110,6 +126,7 @@ public class MainFrame extends JFrame {
 			data[lapIndex][3] = new PaceCell(lap.getRunDurationInSeconds(), lap.getRunDistanceInMeters());
 			lapIndex++;
 		}
+
 		lapsTable = new JTable(data, TABLE_LAPS_COLUMN_NAMES);
 		lapsTable.setEnabled(false);
 		lapsTable.setDefaultRenderer(Object.class, new TableCellRenderer());
@@ -117,8 +134,38 @@ public class MainFrame extends JFrame {
 		JScrollPane scrollPane = new JScrollPane(lapsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		scrollPane.setBorder(new EmptyBorder(0, 0, 0, 0));
+		pane = scrollPane;
 
 		addComponent(getContentPane(), gridBagLayout, scrollPane, 0, 2, 1, 2);
+	}
+
+	private void updateLaps(final List<CalculationLap> laps) {
+		Object[][] data = new Object[laps.size()][4];
+		int lapIndex = 0;
+		for (CalculationLap lap : laps) {
+			data[lapIndex][0] = "" + (lapIndex + 1);
+			data[lapIndex][1] = new DistanceCell(lap.getRunDistanceInMeters());
+			data[lapIndex][2] = new DurationCell(lap.getRunDurationInSeconds());
+			data[lapIndex][3] = new PaceCell(lap.getRunDurationInSeconds(), lap.getRunDistanceInMeters());
+			lapIndex++;
+		}
+
+		GridBagConstraints gbc = gridBagLayout.getConstraints(pane);
+		getContentPane().remove(pane);
+
+		lapsTable = new JTable(data, TABLE_LAPS_COLUMN_NAMES);
+		lapsTable.setEnabled(false);
+		lapsTable.setDefaultRenderer(Object.class, new TableCellRenderer());
+
+		JScrollPane scrollPane = new JScrollPane(lapsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane.setBorder(new EmptyBorder(0, 0, 0, 0));
+		pane = scrollPane;
+
+		gridBagLayout.setConstraints(scrollPane, gbc);
+		getContentPane().add(scrollPane);
+		getContentPane().revalidate();
+		getContentPane().repaint();
 	}
 
 	private void setPaces(final ChartPoints chartPoints) {
@@ -130,6 +177,31 @@ public class MainFrame extends JFrame {
 		JPanel chartPanel = new XChartPanel(chart);
 
 		addComponent(getContentPane(), gridBagLayout, chartPanel, 0, 4, 1, 2);
+	}
+
+	private void editLapBorders() {
+		buttonEditLapBorders = new JButton(BUTTON_EDITLAPS_TEXT);
+		buttonEditLapBorders.addActionListener(this);
+
+		addComponent(getContentPane(), gridBagLayout, buttonEditLapBorders, 0, 6, 1, 1);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if (e.getActionCommand().equals(BUTTON_EDITLAPS_TEXT)) {
+			dialogEditLapBorders.setVisible(true);
+			if (dialogEditLapBorders.isClosedByOkButton()) {
+				List<CalculationLap> calculatedLaps;
+				if (dialogEditLapBorders.hasChosenDistanceLaps()) {
+					double kmPerRound = dialogEditLapBorders.getRoundKm();
+					calculatedLaps = LapCreationLogic.createLapsByDistanceRounds(track, kmPerRound);
+				} else {
+					int minPerRound = dialogEditLapBorders.getRoundMin();
+					calculatedLaps = LapCreationLogic.createLapsByTimeRounds(track, minPerRound);
+				}
+				updateLaps(calculatedLaps);
+			}
+		}
 	}
 
 	public static void main(String[] args) {
