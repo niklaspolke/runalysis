@@ -71,6 +71,12 @@
             <descriptorRef>jar-with-dependencies</descriptorRef>
             <descriptorRef>src</descriptorRef>
           </descriptorRefs>
+          <archive>
+            <manifest>
+              <mainClass>vu.de.npolke.runalysis.gui.MainFrame</mainClass>
+            </manifest>
+          </archive>
+          <tarLongFileMode>gnu</tarLongFileMode> <!-- maybe wrong but other than omit doesn't display debug messages -->
         </configuration>
         <executions>
           <execution>
