@@ -20,11 +20,8 @@ import vu.de.npolke.runalysis.PaceCalculator;
 import vu.de.npolke.runalysis.TcxParser;
 import vu.de.npolke.runalysis.calculation.CalculationLap;
 import vu.de.npolke.runalysis.calculation.CalculationTrack;
-import vu.de.npolke.runalysis.gui.cells.DistanceCell;
-import vu.de.npolke.runalysis.gui.cells.DurationCell;
-import vu.de.npolke.runalysis.gui.cells.PaceCell;
 import vu.de.npolke.runalysis.gui.cells.TableCellRenderer;
-import vu.de.npolke.runalysis.gui.cells.TimestampCell;
+import vu.de.npolke.runalysis.gui.cells.TableModel;
 
 import com.xeiam.xchart.Chart;
 import com.xeiam.xchart.XChartPanel;
@@ -52,19 +49,13 @@ public class MainFrame extends JFrame implements ActionListener {
 	private static final int CHART_WIDTH = 800;
 	private static final int CHART_HEIGHT = 200;
 
-	private static final String[] TABLE_TRACK_COLUMN_NAMES = { "Start", "Distance", "Duration", "Pace" };
-	private static final String[] TABLE_LAPS_COLUMN_NAMES = { "Runde", "Distance", "Duration", "Pace" };
-
 	private static final String BUTTON_EDITLAPS_TEXT = "Edit Lap Borders";
 
-	private JTable trackTable;
-	private JTable lapsTable;
+	private TableModel lapsTableModel;
 	private GridBagLayout gridBagLayout;
 
 	private JButton buttonEditLapBorders;
 	private EditLapBordersDialog dialogEditLapBorders;
-
-	JScrollPane pane;
 
 	private CalculationTrack track;
 
@@ -77,7 +68,7 @@ public class MainFrame extends JFrame implements ActionListener {
 		this.track = track;
 		setTrack(track);
 		setLaps(track.getLaps());
-		setPaces(PaceCalculator.calculatePace(track, 30));
+		setPaceDiagram(PaceCalculator.calculatePace(track, 30));
 		editLapBorders();
 		dialogEditLapBorders = new EditLapBordersDialog(this);
 
@@ -101,12 +92,8 @@ public class MainFrame extends JFrame implements ActionListener {
 	}
 
 	private void setTrack(final CalculationTrack track) {
-		Object[][] data = new Object[1][4];
-		data[0][0] = new TimestampCell(track.getStartTimestamp());
-		data[0][1] = new DistanceCell(track.getRunDistanceInMeters());
-		data[0][2] = new DurationCell(track.getRunDurationInSeconds());
-		data[0][3] = new PaceCell(track.getRunDurationInSeconds(), track.getRunDistanceInMeters());
-		trackTable = new JTable(data, TABLE_TRACK_COLUMN_NAMES);
+		TableModel trackTableModel = new TableModel(track);
+		JTable trackTable = new JTable(trackTableModel);
 		trackTable.setEnabled(false);
 		trackTable.setDefaultRenderer(Object.class, new TableCellRenderer());
 
@@ -117,59 +104,23 @@ public class MainFrame extends JFrame implements ActionListener {
 	}
 
 	private void setLaps(final List<CalculationLap> laps) {
-		Object[][] data = new Object[laps.size()][4];
-		int lapIndex = 0;
-		for (CalculationLap lap : laps) {
-			data[lapIndex][0] = "" + (lapIndex + 1);
-			data[lapIndex][1] = new DistanceCell(lap.getRunDistanceInMeters());
-			data[lapIndex][2] = new DurationCell(lap.getRunDurationInSeconds());
-			data[lapIndex][3] = new PaceCell(lap.getRunDurationInSeconds(), lap.getRunDistanceInMeters());
-			lapIndex++;
-		}
-
-		lapsTable = new JTable(data, TABLE_LAPS_COLUMN_NAMES);
+		lapsTableModel = new TableModel(laps);
+		JTable lapsTable = new JTable(lapsTableModel);
 		lapsTable.setEnabled(false);
 		lapsTable.setDefaultRenderer(Object.class, new TableCellRenderer());
 
 		JScrollPane scrollPane = new JScrollPane(lapsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		scrollPane.setBorder(new EmptyBorder(0, 0, 0, 0));
-		pane = scrollPane;
 
 		addComponent(getContentPane(), gridBagLayout, scrollPane, 0, 2, 1, 2);
 	}
 
 	private void updateLaps(final List<CalculationLap> laps) {
-		Object[][] data = new Object[laps.size()][4];
-		int lapIndex = 0;
-		for (CalculationLap lap : laps) {
-			data[lapIndex][0] = "" + (lapIndex + 1);
-			data[lapIndex][1] = new DistanceCell(lap.getRunDistanceInMeters());
-			data[lapIndex][2] = new DurationCell(lap.getRunDurationInSeconds());
-			data[lapIndex][3] = new PaceCell(lap.getRunDurationInSeconds(), lap.getRunDistanceInMeters());
-			lapIndex++;
-		}
-
-		GridBagConstraints gbc = gridBagLayout.getConstraints(pane);
-		getContentPane().remove(pane);
-
-		lapsTable = new JTable(data, TABLE_LAPS_COLUMN_NAMES);
-		lapsTable.setEnabled(false);
-		lapsTable.setDefaultRenderer(Object.class, new TableCellRenderer());
-
-		JScrollPane scrollPane = new JScrollPane(lapsTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollPane.setBorder(new EmptyBorder(0, 0, 0, 0));
-		pane = scrollPane;
-
-		gridBagLayout.setConstraints(scrollPane, gbc);
-		getContentPane().add(scrollPane);
-		getContentPane().revalidate();
-		getContentPane().repaint();
+		lapsTableModel.setLaps(laps);
 	}
 
-	private void setPaces(final ChartPoints chartPoints) {
-
+	private void setPaceDiagram(final ChartPoints chartPoints) {
 		Chart chart = new Chart(CHART_WIDTH, CHART_HEIGHT);
 		chart.addSeries(CHART_SERIES_TITLE, chartPoints.getTimestamps(), chartPoints.getValues());
 		chart.getStyleManager().setYAxisMin(2);
