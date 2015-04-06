@@ -20,27 +20,29 @@ public class PaceCalculator {
 	public static ChartPoints calculatePace(final CalculationTrack track, final int timeIntervalInSeconds) {
 		ChartPoints chartPoints = new ChartPoints();
 
-		CalculationTrackpointDecorator predecessorPoint = null;
-		long timeDifferenceInMilliseconds;
-		double distanceDifferenceInMeters;
-		double paceInMinPerKilometer;
+		if (track != null) {
+			CalculationTrackpointDecorator predecessorPoint = null;
+			long timeDifferenceInMilliseconds;
+			double distanceDifferenceInMeters;
+			double paceInMinPerKilometer;
 
-		for (CalculationTrackpointDecorator actualPoint : track.getTrackpoints()) {
-			if (predecessorPoint == null || BreakMarker.FIRST_POINT_AFTER_BREAK.equals(actualPoint.getBreakMarker())) {
-				predecessorPoint = actualPoint;
-			} else {
-				timeDifferenceInMilliseconds = actualPoint.getTimestampMillis() - predecessorPoint.getTimestampMillis();
-
-				// do not take every Trackpoint to get a less chaotic diagram
-				if (timeDifferenceInMilliseconds >= timeIntervalInSeconds * 1000
-						|| BreakMarker.LAST_POINT_BEFORE_BREAK.equals(actualPoint.getBreakMarker())) {
-					distanceDifferenceInMeters = actualPoint.getRecordedDistanceMeters() - predecessorPoint.getRecordedDistanceMeters();
-
-					paceInMinPerKilometer = timeDifferenceInMilliseconds / (distanceDifferenceInMeters / 1000d) / 60000d;
-
-					chartPoints.addChartPoint(actualPoint.getTimestampMillis(), paceInMinPerKilometer);
-
+			for (CalculationTrackpointDecorator actualPoint : track.getTrackpoints()) {
+				if (predecessorPoint == null || BreakMarker.FIRST_POINT_AFTER_BREAK.equals(actualPoint.getBreakMarker())) {
 					predecessorPoint = actualPoint;
+				} else {
+					timeDifferenceInMilliseconds = actualPoint.getTimestampMillis() - predecessorPoint.getTimestampMillis();
+
+					// do not take every Trackpoint to get a less chaotic diagram
+					if (timeDifferenceInMilliseconds >= timeIntervalInSeconds * 1000
+							|| BreakMarker.LAST_POINT_BEFORE_BREAK.equals(actualPoint.getBreakMarker())) {
+						distanceDifferenceInMeters = actualPoint.getRecordedDistanceMeters() - predecessorPoint.getRecordedDistanceMeters();
+
+						paceInMinPerKilometer = timeDifferenceInMilliseconds / (distanceDifferenceInMeters / 1000d) / 60000d;
+
+						chartPoints.addChartPoint(actualPoint.getTimestampMillis(), paceInMinPerKilometer);
+
+						predecessorPoint = actualPoint;
+					}
 				}
 			}
 		}

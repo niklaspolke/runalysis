@@ -54,12 +54,15 @@ public class TcxParser {
 	private static final String TIMESTAMP_FORMAT_SHORT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 	private static final SimpleDateFormat TIMESTAMP_FORMATTER_SHORT = new SimpleDateFormat(TIMESTAMP_FORMAT_SHORT);
 
-	private final String filename;
+	private String filename;
 	private InputStream inputStream;
 
 	private ParserState state;
 
 	private Track track;
+
+	public TcxParser() {
+	}
 
 	public TcxParser(final String filename) {
 		this.filename = filename;
@@ -72,6 +75,11 @@ public class TcxParser {
 
 	public String getFilename() {
 		return filename;
+	}
+
+	public void setFilename(final String filename) {
+		this.filename = filename;
+		inputStream = null;
 	}
 
 	public void changeState(final ParserState newState) {

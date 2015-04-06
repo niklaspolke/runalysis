@@ -37,32 +37,40 @@ public class TableModel extends AbstractTableModel {
 
 	public void setTrack(final CalculationTrack track) {
 		mode = Mode.TRACK;
-		cells = new Object[1][TABLE_TRACK_COLUMN_NAMES.length];
-		cells[0][0] = new TimestampCell(track.getStartTimestamp());
-		cells[0][1] = new DistanceCell(track.getRunDistanceInMeters());
-		cells[0][2] = new DurationCell(track.getRunDurationInSeconds());
-		cells[0][3] = new PaceCell(track.getRunDurationInSeconds(), track.getRunDistanceInMeters());
+		if (track != null) {
+			cells = new Object[1][TABLE_TRACK_COLUMN_NAMES.length];
+			cells[0][0] = new TimestampCell(track.getStartTimestamp());
+			cells[0][1] = new DistanceCell(track.getRunDistanceInMeters());
+			cells[0][2] = new DurationCell(track.getRunDurationInSeconds());
+			cells[0][3] = new PaceCell(track.getRunDurationInSeconds(), track.getRunDistanceInMeters());
+		} else {
+			cells = null;
+		}
 		fireTableDataChanged();
 	}
 
 	public void setLaps(final List<CalculationLap> laps) {
 		mode = Mode.LAPS;
-		cells = new Object[laps.size()][TABLE_LAPS_COLUMN_NAMES.length];
+		if (laps != null) {
+			cells = new Object[laps.size()][TABLE_LAPS_COLUMN_NAMES.length];
 
-		int lapIndex = 0;
-		for (CalculationLap lap : laps) {
-			cells[lapIndex][0] = "" + (lapIndex + 1);
-			cells[lapIndex][1] = new DistanceCell(lap.getRunDistanceInMeters());
-			cells[lapIndex][2] = new DurationCell(lap.getRunDurationInSeconds());
-			cells[lapIndex][3] = new PaceCell(lap.getRunDurationInSeconds(), lap.getRunDistanceInMeters());
-			lapIndex++;
+			int lapIndex = 0;
+			for (CalculationLap lap : laps) {
+				cells[lapIndex][0] = "" + (lapIndex + 1);
+				cells[lapIndex][1] = new DistanceCell(lap.getRunDistanceInMeters());
+				cells[lapIndex][2] = new DurationCell(lap.getRunDurationInSeconds());
+				cells[lapIndex][3] = new PaceCell(lap.getRunDurationInSeconds(), lap.getRunDistanceInMeters());
+				lapIndex++;
+			}
+		} else {
+			cells = null;
 		}
 		fireTableDataChanged();
 	}
 
 	@Override
 	public int getRowCount() {
-		return cells.length;
+		return cells != null ? cells.length : 0;
 	}
 
 	@Override

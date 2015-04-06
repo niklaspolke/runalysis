@@ -1,18 +1,30 @@
 package vu.de.npolke.runalysis.gui;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
 
 import vu.de.npolke.runalysis.LapCreationLogic;
@@ -25,6 +37,8 @@ import vu.de.npolke.runalysis.gui.cells.TableCellRenderer;
 import vu.de.npolke.runalysis.gui.cells.TableModel;
 
 import com.xeiam.xchart.Chart;
+import com.xeiam.xchart.Series;
+import com.xeiam.xchart.SeriesMarker;
 import com.xeiam.xchart.XChartPanel;
 
 /**
@@ -42,16 +56,23 @@ import com.xeiam.xchart.XChartPanel;
 public class MainFrame extends JFrame implements ActionListener {
 
 	private static final String WINDOW_TITLE = "Runalysis by Niklas Polke";
-	private static final int WINDOW_WIDTH = 1200;
-	private static final int WINDOW_HEIGHT = 400;
+	private static final int WINDOW_WIDTH = 800;
+	private static final int WINDOW_HEIGHT = 600;
 	private static final int WINDOW_LOCATION_X = 400;
 	private static final int WINDOW_LOCATION_Y = 100;
 	private static final String CHART_SERIES_TITLE = "Pace (min/km)";
 	private static final int CHART_WIDTH = 800;
 	private static final int CHART_HEIGHT = 200;
 
+	private static final String MENU_FILE = "File";
+	private static final String MENU_FILE_OPEN = "Open File...";
+	private static final String MENU_FILE_OPEN_ICON = "/open.png";
+
 	private static final String BUTTON_EDITLAPS_TEXT = "Edit Lap Borders";
 
+	private final TcxParser parser;
+
+	private TableModel trackTableModel;
 	private TableModel lapsTableModel;
 	private GridBagLayout gridBagLayout;
 
@@ -59,23 +80,51 @@ public class MainFrame extends JFrame implements ActionListener {
 	private EditLapBordersDialog dialogEditLapBorders;
 
 	private CalculationTrack track;
+	private Chart chart;
+	private JPanel chartPanel;
 
-	public MainFrame(final CalculationTrack track) {
+	private ImageIcon openIcon;
+	private JFileChooser fileChooser;
+
+	public MainFrame() {
 		super(WINDOW_TITLE);
 
 		gridBagLayout = new GridBagLayout();
 		getContentPane().setLayout(gridBagLayout);
 
-		this.track = track;
-		setTrack(track);
-		setLaps(track.getLaps());
-		setPaceDiagram(PaceCalculator.calculatePace(track, 30));
+		initializeTrackTable(null);
+		initializeLapsTable(null);
+		initializePaceDiagram();
 		editLapBorders();
 		dialogEditLapBorders = new EditLapBordersDialog(this);
+
+		setJMenuBar(createMenuBar());
 
 		setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 		setLocation(WINDOW_LOCATION_X, WINDOW_LOCATION_Y);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		parser = new TcxParser();
+	}
+
+	public JMenuBar createMenuBar() {
+		JMenuBar menuBar = new JMenuBar();
+
+		try {
+			openIcon = new ImageIcon(ImageIO.read(getClass().getResourceAsStream(MENU_FILE_OPEN_ICON)));
+		} catch (IOException e) {
+		}
+
+		JMenu menu = new JMenu(MENU_FILE);
+		menu.setMnemonic(KeyEvent.VK_F);
+		JMenuItem menuItem = new JMenuItem(MENU_FILE_OPEN, openIcon);
+		menuItem.setMnemonic(KeyEvent.VK_O);
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
+		menuItem.addActionListener(this);
+		menu.add(menuItem);
+
+		menuBar.add(menu);
+		return menuBar;
 	}
 
 	private static void addComponent(final Container container, final GridBagLayout gbl, final JComponent component, final int x,
@@ -92,8 +141,17 @@ public class MainFrame extends JFrame implements ActionListener {
 		container.add(component);
 	}
 
-	private void setTrack(final CalculationTrack track) {
-		TableModel trackTableModel = new TableModel(track);
+	public void openFile(final String filename) {
+		parser.setFilename(filename);
+		parser.readFile();
+		track = parser.getTrack();
+		updateTrack(track);
+		updateLaps(track.getLaps());
+		updatePaceDiagram(track);
+	}
+
+	private void initializeTrackTable(final CalculationTrack track) {
+		trackTableModel = new TableModel(track);
 		JTable trackTable = new JTable(trackTableModel);
 		trackTable.setEnabled(false);
 		trackTable.setDefaultRenderer(Object.class, new TableCellRenderer());
@@ -104,7 +162,7 @@ public class MainFrame extends JFrame implements ActionListener {
 		addComponent(getContentPane(), gridBagLayout, scrollPane, 0, 0, 1, 1);
 	}
 
-	private void setLaps(final List<CalculationLap> laps) {
+	private void initializeLapsTable(final List<CalculationLap> laps) {
 		lapsTableModel = new TableModel(laps);
 		JTable lapsTable = new JTable(lapsTableModel);
 		lapsTable.setEnabled(false);
@@ -117,18 +175,48 @@ public class MainFrame extends JFrame implements ActionListener {
 		addComponent(getContentPane(), gridBagLayout, scrollPane, 0, 2, 1, 2);
 	}
 
+	private void initializePaceDiagram() {
+		chart = new Chart(CHART_WIDTH, CHART_HEIGHT);
+		chart.getStyleManager().setYAxisMin(2);
+		chart.getStyleManager().setYAxisMax(9);
+		chartPanel = new XChartPanel(chart);
+		chartPanel.setVisible(false);
+
+		addComponent(getContentPane(), gridBagLayout, chartPanel, 0, 4, 1, 2);
+	}
+
 	private void updateLaps(final List<CalculationLap> laps) {
 		lapsTableModel.setLaps(laps);
 	}
 
-	private void setPaceDiagram(final ChartPoints chartPoints) {
-		Chart chart = new Chart(CHART_WIDTH, CHART_HEIGHT);
-		chart.addSeries(CHART_SERIES_TITLE, chartPoints.getTimestamps(), chartPoints.getValues());
-		chart.getStyleManager().setYAxisMin(2);
-		chart.getStyleManager().setYAxisMax(9);
-		JPanel chartPanel = new XChartPanel(chart);
+	private void updateTrack(final CalculationTrack track) {
+		trackTableModel.setTrack(track);
+	}
 
-		addComponent(getContentPane(), gridBagLayout, chartPanel, 0, 4, 1, 2);
+	private void updatePaceDiagram(final CalculationTrack track) {
+		boolean oldStyleExists = false;
+		BasicStroke stroke = null;
+		Color strokeColor = null, fillColor = null, markerColor = null;
+		if (chart.getSeriesMap().size() > 0) {
+			oldStyleExists = true;
+			Series serie = chart.getSeriesMap().values().iterator().next();
+			stroke = serie.getStroke();
+			strokeColor = serie.getStrokeColor();
+			fillColor = serie.getFillColor();
+			markerColor = serie.getMarkerColor();
+		}
+		ChartPoints points = PaceCalculator.calculatePace(track, 30);
+		chart.getSeriesMap().clear();
+		chart.addSeries(CHART_SERIES_TITLE, points.getTimestamps(), points.getValues());
+		if (oldStyleExists) {
+			Series serie = chart.getSeriesMap().values().iterator().next();
+			serie.setLineStyle(stroke);
+			serie.setLineColor(strokeColor);
+			serie.setFillColor(fillColor);
+			serie.setMarkerColor(markerColor);
+			serie.setMarker(SeriesMarker.CIRCLE);
+		}
+		chartPanel.setVisible(true);
 	}
 
 	private void editLapBorders() {
@@ -156,18 +244,24 @@ public class MainFrame extends JFrame implements ActionListener {
 				}
 				updateLaps(calculatedLaps);
 			}
+		} else if (e.getActionCommand().equals(MENU_FILE_OPEN)) {
+			if (fileChooser == null) {
+				fileChooser = new JFileChooser();
+				fileChooser.setFileFilter(new TcxFileFilter());
+			}
+			int returnVal = fileChooser.showOpenDialog(this);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				File file = fileChooser.getSelectedFile();
+				openFile(file.getAbsolutePath());
+			}
 		}
 	}
 
 	public static void main(String[] args) {
-		if (args.length != 1) {
-			System.out.println(TcxParser.USAGE);
-		} else {
-			TcxParser parser = new TcxParser(args[0]);
-			parser.readFile();
-			CalculationTrack track = parser.getTrack();
-			MainFrame frame = new MainFrame(track);
-			frame.setVisible(true);
+		MainFrame frame = new MainFrame();
+		if (args.length == 1) {
+			frame.openFile(args[0]);
 		}
+		frame.setVisible(true);
 	}
 }
