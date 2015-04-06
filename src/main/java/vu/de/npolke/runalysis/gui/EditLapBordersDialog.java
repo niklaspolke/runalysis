@@ -106,9 +106,7 @@ public class EditLapBordersDialog extends JDialog implements ActionListener, Ite
 	private JSpinner intervalCooldownTimeSpinner;
 	private JSpinner intervalCooldownDistanceSpinner;
 
-	private JLabel timeLapsLabel;
 	private JSpinner timeLapsSpinner;
-	private JLabel distanceLapsLabel;
 	private JSpinner distanceLapsSpinner;
 
 	JButton okButton;
@@ -134,10 +132,10 @@ public class EditLapBordersDialog extends JDialog implements ActionListener, Ite
 		typesOflapBorders.add(rbDistanceLaps);
 		typesOflapBorders.add(rbIntervalLaps);
 
-		timeLapsLabel = createAndLayoutLabel(TIMELAPS_LABEL, SwingConstants.RIGHT, getContentPane(), gridBagLayout, 2, 0, 2, 1);
+		createAndLayoutLabel(TIMELAPS_LABEL, SwingConstants.RIGHT, getContentPane(), gridBagLayout, 2, 0, 2, 1);
 		timeLapsSpinner = createAndLayoutDisabledTimeSpinner(getContentPane(), gridBagLayout, 4, 0, 1, 1);
 
-		distanceLapsLabel = createAndLayoutLabel(DISTANCELAPS_LABEL, SwingConstants.RIGHT, getContentPane(), gridBagLayout, 2, 1, 2, 1);
+		createAndLayoutLabel(DISTANCELAPS_LABEL, SwingConstants.RIGHT, getContentPane(), gridBagLayout, 2, 1, 2, 1);
 		distanceLapsSpinner = createAndLayoutDisabledDistanceSpinner(getContentPane(), gridBagLayout, 4, 1, 1, 1);
 
 		createAndLayoutLabel(INTERVALLAPS_WARMUP, SwingConstants.CENTER, getContentPane(), gridBagLayout, 2, 2, 2, 1);
