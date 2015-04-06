@@ -20,6 +20,7 @@ import vu.de.npolke.runalysis.PaceCalculator;
 import vu.de.npolke.runalysis.TcxParser;
 import vu.de.npolke.runalysis.calculation.CalculationLap;
 import vu.de.npolke.runalysis.calculation.CalculationTrack;
+import vu.de.npolke.runalysis.calculation.Interval;
 import vu.de.npolke.runalysis.gui.cells.TableCellRenderer;
 import vu.de.npolke.runalysis.gui.cells.TableModel;
 
@@ -146,9 +147,12 @@ public class MainFrame extends JFrame implements ActionListener {
 				if (dialogEditLapBorders.hasChosenDistanceLaps()) {
 					double kmPerRound = dialogEditLapBorders.getRoundKm();
 					calculatedLaps = LapCreationLogic.createLapsByDistanceRounds(track, kmPerRound);
-				} else {
+				} else if (dialogEditLapBorders.hasChosenTimeLaps()) {
 					int minPerRound = dialogEditLapBorders.getRoundMin();
 					calculatedLaps = LapCreationLogic.createLapsByTimeRounds(track, minPerRound);
+				} else {
+					List<Interval> intervals = dialogEditLapBorders.getIntervals();
+					calculatedLaps = LapCreationLogic.createLapsByIntervals(track, intervals);
 				}
 				updateLaps(calculatedLaps);
 			}

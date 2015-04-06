@@ -1,11 +1,15 @@
 package vu.de.npolke.runalysis;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import vu.de.npolke.runalysis.calculation.CalculationLap;
 import vu.de.npolke.runalysis.calculation.CalculationTrack;
 import vu.de.npolke.runalysis.calculation.CalculationTrackpointDecorator;
+import vu.de.npolke.runalysis.calculation.DistanceInterval;
+import vu.de.npolke.runalysis.calculation.Interval;
+import vu.de.npolke.runalysis.calculation.TimeInterval;
 
 /**
  * Copyright (C) 2015 Niklas Polke<br/>
@@ -33,59 +37,118 @@ public class LapCreationLogic {
 
 	public static List<CalculationLap> createLapsByTimeRounds(final CalculationTrack track, final int minPerRound) {
 		List<CalculationLap> timeRoundLaps = new ArrayList<CalculationLap>();
+		PointerToLastEndpoint lastLapEndPoint = new PointerToLastEndpoint();
+		CalculationLap newLap;
 
-		CalculationTrackpointDecorator endPointOfLastLap = null;
-		CalculationTrackpointDecorator currentPoint = null;
-		long timeDifferenceInMilliseconds;
-
-		for (CalculationTrackpointDecorator point : track.getTrackpoints()) {
-			currentPoint = point;
-			timeDifferenceInMilliseconds = currentPoint.getRunDurationInMilliseconds();
-			if (endPointOfLastLap != null) {
-				timeDifferenceInMilliseconds -= endPointOfLastLap.getRunDurationInMilliseconds();
+		do {
+			newLap = createLapByTime(minPerRound, track, lastLapEndPoint);
+			if (newLap != null) {
+				timeRoundLaps.add(newLap);
 			}
-
-			// create lap after minPerRound minutes
-			if (timeDifferenceInMilliseconds >= minPerRound * 60 * 1000) {
-				timeRoundLaps.add(createLap(currentPoint, endPointOfLastLap));
-				endPointOfLastLap = currentPoint;
-			}
-		}
-
-		// create end lap
-		if (currentPoint != endPointOfLastLap) {
-			timeRoundLaps.add(createLap(currentPoint, endPointOfLastLap));
-		}
+		} while (newLap != null);
 
 		return timeRoundLaps;
 	}
 
 	public static List<CalculationLap> createLapsByDistanceRounds(final CalculationTrack track, final double kmPerRound) {
-		List<CalculationLap> timeRoundLaps = new ArrayList<CalculationLap>();
+		List<CalculationLap> distanceRoundLaps = new ArrayList<CalculationLap>();
+		PointerToLastEndpoint lastLapEndPoint = new PointerToLastEndpoint();
+		CalculationLap newLap;
 
-		CalculationTrackpointDecorator endPointOfLastLap = null;
+		do {
+			newLap = createLapByDistance(kmPerRound, track, lastLapEndPoint);
+			if (newLap != null) {
+				distanceRoundLaps.add(newLap);
+			}
+		} while (newLap != null);
+
+		return distanceRoundLaps;
+	}
+
+	public static List<CalculationLap> createLapsByIntervals(final CalculationTrack track, final List<Interval> intervals) {
+		List<CalculationLap> intervalLaps = new ArrayList<CalculationLap>();
+		PointerToLastEndpoint lastLapEndPoint = new PointerToLastEndpoint();
+		CalculationLap newLap;
+
+		for (Interval interval : intervals) {
+			if (interval instanceof TimeInterval) {
+				TimeInterval timeInterval = (TimeInterval) interval;
+				newLap = createLapByTime(timeInterval.getTimeInMinutes(), track, lastLapEndPoint);
+			} else {
+				DistanceInterval distanceInterval = (DistanceInterval) interval;
+				newLap = createLapByDistance(distanceInterval.getDistanceInKilometers(), track, lastLapEndPoint);
+			}
+			if (newLap != null) {
+				intervalLaps.add(newLap);
+			}
+		}
+
+		// if possible, create last lap
+		newLap = createLapByDistance(1000, track, lastLapEndPoint);
+		if (newLap != null) {
+			intervalLaps.add(newLap);
+		}
+
+		return intervalLaps;
+	}
+
+	private static CalculationLap createLapByTime(final double timeInMinutes, final CalculationTrack track,
+			final PointerToLastEndpoint lastLapEndPoint) {
+		CalculationLap newLap = null;
 		CalculationTrackpointDecorator currentPoint = null;
-		double distanceDifferenceInMeters;
+		long timeDifferenceInMilliseconds = 0;
 
-		for (CalculationTrackpointDecorator point : track.getTrackpoints()) {
-			currentPoint = point;
+		// go to current point
+		Iterator<CalculationTrackpointDecorator> pointIterator = track.getTrackpoints().iterator();
+		do {
+			currentPoint = pointIterator.next();
+		} while (currentPoint != lastLapEndPoint.point && lastLapEndPoint.point != null);
+
+		while (pointIterator.hasNext() && timeDifferenceInMilliseconds < timeInMinutes * 60 * 1000) {
+			currentPoint = pointIterator.next();
+			timeDifferenceInMilliseconds = currentPoint.getRunDurationInMilliseconds();
+			if (lastLapEndPoint.point != null) {
+				timeDifferenceInMilliseconds -= lastLapEndPoint.point.getRunDurationInMilliseconds();
+			}
+		}
+
+		if (currentPoint != lastLapEndPoint.point) {
+			newLap = createLap(currentPoint, lastLapEndPoint.point);
+			lastLapEndPoint.point = currentPoint;
+		}
+
+		return newLap;
+	}
+
+	private static CalculationLap createLapByDistance(final double distanceInKilometers, final CalculationTrack track,
+			final PointerToLastEndpoint lastLapEndPoint) {
+		CalculationLap newLap = null;
+		CalculationTrackpointDecorator currentPoint = null;
+		double distanceDifferenceInMeters = 0;
+
+		// go to current point
+		Iterator<CalculationTrackpointDecorator> pointIterator = track.getTrackpoints().iterator();
+		do {
+			currentPoint = pointIterator.next();
+		} while (currentPoint != lastLapEndPoint.point && lastLapEndPoint.point != null);
+
+		while (pointIterator.hasNext() && distanceDifferenceInMeters < distanceInKilometers * 1000) {
+			currentPoint = pointIterator.next();
 			distanceDifferenceInMeters = currentPoint.getRunDistanceInMeters();
-			if (endPointOfLastLap != null) {
-				distanceDifferenceInMeters -= endPointOfLastLap.getRunDistanceInMeters();
-			}
-
-			// create lap after kmPerRound kilometers
-			if (distanceDifferenceInMeters >= kmPerRound * 1000) {
-				timeRoundLaps.add(createLap(currentPoint, endPointOfLastLap));
-				endPointOfLastLap = currentPoint;
+			if (lastLapEndPoint.point != null) {
+				distanceDifferenceInMeters -= lastLapEndPoint.point.getRunDistanceInMeters();
 			}
 		}
 
-		// create end lap
-		if (currentPoint != endPointOfLastLap) {
-			timeRoundLaps.add(createLap(currentPoint, endPointOfLastLap));
+		if (currentPoint != lastLapEndPoint.point) {
+			newLap = createLap(currentPoint, lastLapEndPoint.point);
+			lastLapEndPoint.point = currentPoint;
 		}
 
-		return timeRoundLaps;
+		return newLap;
+	}
+
+	static class PointerToLastEndpoint {
+		CalculationTrackpointDecorator point;
 	}
 }
