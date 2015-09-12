@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/niklaspolke/runalysis.png?label=ready&title=Ready)](https://waffle.io/niklaspolke/runalysis)
 # Runalysis
 Runalysis analyses your tracked GPS-Data (e.g. from a GPS watch like *Garmin Forerunner*, *TomTom Runner*, ...).
 
